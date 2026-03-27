@@ -377,48 +377,48 @@ export default function CalendarPage() {
 
       {/* ── CREATE MODAL ── */}
       <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-        <DialogContent className="rounded-2xl max-w-md mx-4 sm:mx-auto">
+        <DialogContent className="rounded-2xl w-[90vw] max-w-sm mx-auto">
           <DialogHeader>
-            <DialogTitle className="text-xl font-bold">Novo Agendamento</DialogTitle>
+            <DialogTitle className="text-base font-bold">Novo Agendamento</DialogTitle>
           </DialogHeader>
           <form
             onSubmit={form.handleSubmit(d => createMut.mutate({ data: { ...d, status: "confirmed" } }))}
-            className="space-y-4 pt-2"
+            className="space-y-3 pt-1"
           >
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium">Nome da Cliente *</label>
-              <Input {...form.register("clientName")} placeholder="Ex: Maria Silva" className="rounded-lg" />
+            <div className="space-y-1">
+              <label className="text-xs font-medium">Nome da Cliente *</label>
+              <Input {...form.register("clientName")} placeholder="Ex: Maria Silva" className="rounded-lg h-9 text-sm" />
               {form.formState.errors.clientName && <p className="text-xs text-red-500">{form.formState.errors.clientName.message}</p>}
             </div>
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium">Telefone</label>
-              <Input {...form.register("clientPhone")} placeholder="(11) 99999-9999" className="rounded-lg" />
+            <div className="space-y-1">
+              <label className="text-xs font-medium">Telefone</label>
+              <Input {...form.register("clientPhone")} placeholder="(11) 99999-9999" className="rounded-lg h-9 text-sm" />
             </div>
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium">Serviço *</label>
-              <select {...form.register("serviceId")} className="w-full h-10 px-3 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/20">
+            <div className="space-y-1">
+              <label className="text-xs font-medium">Serviço *</label>
+              <select {...form.register("serviceId")} className="w-full h-9 px-3 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/20">
                 <option value="">Selecione...</option>
                 {services.map(s => <option key={s.id} value={s.id}>{s.name} — R$ {Number(s.price).toFixed(2).replace(".", ",")}</option>)}
               </select>
               {form.formState.errors.serviceId && <p className="text-xs text-red-500">{form.formState.errors.serviceId.message}</p>}
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium">Data *</label>
-                <Input type="date" {...form.register("date")} className="rounded-lg" />
+            <div className="grid grid-cols-2 gap-2">
+              <div className="space-y-1">
+                <label className="text-xs font-medium">Data *</label>
+                <Input type="date" {...form.register("date")} className="rounded-lg h-9 text-sm" />
               </div>
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium">Hora *</label>
-                <Input type="time" {...form.register("startTime")} className="rounded-lg" />
+              <div className="space-y-1">
+                <label className="text-xs font-medium">Hora *</label>
+                <Input type="time" {...form.register("startTime")} className="rounded-lg h-9 text-sm" />
               </div>
             </div>
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium">Observações</label>
-              <Input {...form.register("notes")} placeholder="Opcional..." className="rounded-lg" />
+            <div className="space-y-1">
+              <label className="text-xs font-medium">Observações</label>
+              <Input {...form.register("notes")} placeholder="Opcional..." className="rounded-lg h-9 text-sm" />
             </div>
-            <div className="flex gap-2 pt-2">
-              <Button type="button" variant="outline" className="flex-1 rounded-lg" onClick={() => setIsCreateOpen(false)}>Cancelar</Button>
-              <Button type="submit" disabled={createMut.isPending} className="flex-1 rounded-lg">
+            <div className="flex gap-2 pt-1">
+              <Button type="button" variant="outline" className="flex-1 rounded-lg h-9 text-sm" onClick={() => setIsCreateOpen(false)}>Cancelar</Button>
+              <Button type="submit" disabled={createMut.isPending} className="flex-1 rounded-lg h-9 text-sm">
                 {createMut.isPending ? "Salvando..." : "Confirmar"}
               </Button>
             </div>
