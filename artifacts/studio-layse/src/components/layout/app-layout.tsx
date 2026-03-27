@@ -27,7 +27,13 @@ const navigation = [
   { name: 'Configurações', href: '/configuracoes', icon: Settings },
 ];
 
-const mobileNav = navigation.slice(0, 5);
+// Bottom bar: Dashboard, Agenda, Clientes, Financeiro only
+const mobileBottomNav = [
+  { name: 'Agenda',     href: '/',           icon: CalendarDays },
+  { name: 'Dashboard',  href: '/dashboard',  icon: LayoutDashboard },
+  { name: 'Clientes',   href: '/clientes',   icon: Users },
+  { name: 'Financeiro', href: '/financeiro', icon: Wallet },
+];
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
@@ -209,49 +215,42 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         )}
       </AnimatePresence>
 
-      {/* ── Mobile Bottom Navigation ── */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-md border-t border-border z-30 px-1">
-        <div className="flex items-stretch">
-          {mobileNav.map((item) => {
+      {/* ── Mobile Bottom Navigation (4 items only) ── */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-md border-t border-border z-30">
+        <div className="flex items-stretch h-14">
+          {mobileBottomNav.map((item) => {
             const active = isActive(item.href);
             return (
               <Link
                 key={item.name}
                 href={item.href}
-                className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-2 transition-colors relative
+                className={`flex-1 flex flex-col items-center justify-center gap-0.5 relative transition-colors
                   ${active ? 'text-primary' : 'text-muted-foreground'}
                 `}
               >
                 {active && (
                   <motion.div
                     layoutId="bottom-pill"
-                    className="absolute top-0 left-2 right-2 h-0.5 bg-primary rounded-full"
+                    className="absolute top-0 left-3 right-3 h-[2px] bg-primary rounded-full"
                     transition={{ type: "spring", bounce: 0.3, duration: 0.35 }}
                   />
                 )}
-                <item.icon className={`w-5 h-5 transition-transform duration-200 ${active ? 'scale-110' : ''}`} />
-                <span className="text-[10px] font-medium">{item.name}</span>
+                <item.icon className={`w-[22px] h-[22px] transition-transform duration-200 ${active ? 'scale-110' : ''}`} />
+                <span className="text-[10px] font-medium leading-none mt-0.5">{item.name}</span>
               </Link>
             );
           })}
-          <button
-            onClick={() => setIsMobileMenuOpen(true)}
-            className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2 text-muted-foreground"
-          >
-            <Menu className="w-5 h-5" />
-            <span className="text-[10px] font-medium">Mais</span>
-          </button>
         </div>
       </nav>
 
       {/* ── Main Content ── */}
-      <main className="flex-1 md:ml-60 min-h-screen">
-        <div className="pt-14 md:pt-0 pb-20 md:pb-0 p-4 md:p-7 max-w-7xl mx-auto w-full">
+      <main className="flex-1 md:ml-60">
+        <div className="pt-14 md:pt-0 pb-16 md:pb-0 p-3 md:p-7 max-w-7xl mx-auto w-full min-h-[calc(100vh-3.5rem)] md:min-h-screen overflow-x-hidden">
           <motion.div
             key={location}
-            initial={{ opacity: 0, y: 6 }}
+            initial={{ opacity: 0, y: 5 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.2, ease: "easeOut" }}
+            transition={{ duration: 0.18, ease: "easeOut" }}
           >
             {children}
           </motion.div>
