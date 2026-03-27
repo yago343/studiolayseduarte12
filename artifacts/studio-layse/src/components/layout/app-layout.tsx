@@ -18,10 +18,10 @@ import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 
 const navigation = [
-  { name: 'Agenda',        href: '/',              icon: CalendarDays },
   { name: 'Dashboard',     href: '/dashboard',     icon: LayoutDashboard },
-  { name: 'Serviços',      href: '/servicos',      icon: Sparkles },
+  { name: 'Agenda',        href: '/',              icon: CalendarDays },
   { name: 'Clientes',      href: '/clientes',      icon: Users },
+  { name: 'Serviços',      href: '/servicos',      icon: Sparkles },
   { name: 'Financeiro',    href: '/financeiro',    icon: Wallet },
   { name: 'Horários',      href: '/horarios',      icon: Clock },
   { name: 'Configurações', href: '/configuracoes', icon: Settings },
@@ -64,10 +64,61 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-background">
 
-      {/* ── Top Header (all screen sizes) ── */}
-      <header className="fixed top-0 left-0 right-0 flex items-center justify-between px-4 h-14 bg-card/95 backdrop-blur-md border-b border-border z-30 shadow-sm">
+      {/* ══════════════════════════════════════
+          DESKTOP: Fixed left sidebar
+          (hidden on mobile)
+      ══════════════════════════════════════ */}
+      <aside className="hidden md:flex flex-col fixed top-0 left-0 bottom-0 w-60 sidebar-gradient z-30">
+        {/* Logo */}
+        <div className="flex items-center gap-2.5 px-5 h-16 border-b border-white/10 shrink-0">
+          <div className="w-8 h-8 rounded-xl brand-gradient flex items-center justify-center shadow-sm shrink-0">
+            <Scissors className="w-4 h-4 text-white" />
+          </div>
+          <span className="font-bold text-sm text-white">Studio Layse</span>
+        </div>
+
+        {/* Nav links */}
+        <nav className="flex-1 p-3 flex flex-col gap-1 overflow-y-auto">
+          {navigation.map((item) => {
+            const active = isActive(item.href);
+            return (
+              <Link
+                key={item.name}
+                href={item.href}
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                  active
+                    ? 'bg-white/15 text-white'
+                    : 'text-white/60 hover:text-white hover:bg-white/10'
+                }`}
+              >
+                <item.icon className="w-4 h-4 shrink-0" />
+                {item.name}
+              </Link>
+            );
+          })}
+        </nav>
+
+        {/* Theme toggle at bottom */}
+        <div className="p-4 border-t border-white/10 shrink-0">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="w-full text-white/60 hover:text-white hover:bg-white/10 gap-2 justify-start"
+            onClick={toggleTheme}
+          >
+            {isDarkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            {isDarkMode ? 'Modo claro' : 'Modo escuro'}
+          </Button>
+        </div>
+      </aside>
+
+      {/* ══════════════════════════════════════
+          MOBILE: Fixed top header
+          (hidden on desktop)
+      ══════════════════════════════════════ */}
+      <header className="md:hidden fixed top-0 left-0 right-0 flex items-center justify-between px-4 h-14 bg-card/95 backdrop-blur-md border-b border-border z-30 shadow-sm">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-xl brand-gradient flex items-center justify-center shadow-sm shrink-0">
             <Scissors className="w-4 h-4 text-white" />
@@ -75,36 +126,14 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           <span className="font-bold text-sm text-foreground">Studio Layse</span>
         </div>
 
-        {/* Desktop nav links in header */}
-        <nav className="hidden md:flex items-center gap-1">
-          {navigation.map((item) => {
-            const active = isActive(item.href);
-            return (
-              <Link
-                key={item.name}
-                href={item.href}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                  active
-                    ? 'bg-primary/10 text-primary'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-muted'
-                }`}
-              >
-                <item.icon className="w-3.5 h-3.5" />
-                {item.name}
-              </Link>
-            );
-          })}
-        </nav>
-
         <div className="flex items-center gap-1">
           <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground" onClick={toggleTheme}>
             {isDarkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
           </Button>
-          {/* Hamburger — mobile only */}
           <Button
             variant="ghost"
             size="icon"
-            className="md:hidden h-8 w-8 text-muted-foreground"
+            className="h-8 w-8 text-muted-foreground"
             onClick={() => setMenuOpen(true)}
           >
             <Menu className="w-5 h-5" />
@@ -116,7 +145,6 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       <AnimatePresence>
         {menuOpen && (
           <>
-            {/* Backdrop */}
             <motion.div
               key="backdrop"
               initial={{ opacity: 0 }}
@@ -126,7 +154,6 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               className="md:hidden fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
               onClick={() => setMenuOpen(false)}
             />
-            {/* Drawer panel */}
             <motion.div
               key="drawer"
               initial={{ x: "100%" }}
@@ -135,7 +162,6 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               transition={{ type: "spring", damping: 28, stiffness: 300 }}
               className="md:hidden fixed top-0 right-0 bottom-0 z-50 w-64 bg-card border-l border-border shadow-2xl flex flex-col"
             >
-              {/* Drawer header */}
               <div className="flex items-center justify-between px-4 h-14 border-b border-border">
                 <div className="flex items-center gap-2.5">
                   <div className="w-7 h-7 rounded-lg brand-gradient flex items-center justify-center">
@@ -147,7 +173,6 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                   <X className="w-4 h-4" />
                 </Button>
               </div>
-              {/* Nav links */}
               <nav className="flex-1 p-3 flex flex-col gap-1 overflow-y-auto">
                 {navigation.map((item) => {
                   const active = isActive(item.href);
@@ -173,7 +198,10 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         )}
       </AnimatePresence>
 
-      {/* ── Mobile Bottom Navigation ── */}
+      {/* ══════════════════════════════════════
+          MOBILE: Bottom navigation bar
+          (hidden on desktop)
+      ══════════════════════════════════════ */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-md border-t border-border z-30">
         <div className="flex items-stretch h-14">
           {mobileBottomNav.map((item) => {
@@ -201,9 +229,13 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         </div>
       </nav>
 
-      {/* ── Main Content ── */}
-      <main className="flex-1">
-        <div className="pt-16 pb-16 px-3 md:pt-7 md:pb-7 md:px-7 max-w-7xl mx-auto w-full overflow-x-hidden">
+      {/* ══════════════════════════════════════
+          Main content
+          Mobile:  pt-14 pb-16 (top bar + bottom nav)
+          Desktop: pl-60 (sidebar width)
+      ══════════════════════════════════════ */}
+      <main className="md:pl-60">
+        <div className="pt-14 pb-16 px-3 md:pt-8 md:pb-8 md:px-8 max-w-[1400px] mx-auto w-full overflow-x-hidden">
           <motion.div
             key={location}
             initial={{ opacity: 0, y: 5 }}
