@@ -16,6 +16,7 @@ import {
   eachDayOfInterval,
   addMonths,
   subMonths,
+  startOfWeek,
   getDay,
   isSameDay,
   isSameMonth,
@@ -33,6 +34,7 @@ import { useToast } from "@/hooks/use-toast";
 import {
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
   Plus,
   CheckCircle2,
   XCircle,
@@ -81,7 +83,7 @@ const aptSchema = z.object({
 });
 type AptForm = z.infer<typeof aptSchema>;
 
-/* ─── Mini Calendar Component ────────────────────────────────── */
+/* ─── Mini Calendar Component (collapsible) ─────────────────── */
 function MiniCalendar({
   selected,
   onChange,
@@ -91,10 +93,17 @@ function MiniCalendar({
   onChange: (d: Date) => void;
   appointmentDates: Set<string>;
 }) {
+  const [expanded, setExpanded] = useState(false);
   const [viewMonth, setViewMonth] = useState(new Date(selected));
   const today = new Date();
   const todayStr = format(today, "yyyy-MM-dd");
+  const weekDays = ["S", "T", "Q", "Q", "S", "S", "D"];
 
+  // Current week (Mon → Sun) for collapsed view
+  const weekStart = startOfWeek(selected, { weekStartsOn: 1 });
+  const currentWeek = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
+
+  // Full month data for expanded view
   const monthStart = startOfMonth(viewMonth);
   const monthEnd = endOfMonth(viewMonth);
   const startPad = (getDay(monthStart) + 6) % 7;
@@ -102,34 +111,71 @@ function MiniCalendar({
   const allCells: (Date | null)[] = [...Array(startPad).fill(null), ...days];
   const rows = Math.ceil(allCells.length / 7);
 
-  const weekDays = ["S", "T", "Q", "Q", "S", "S", "D"];
+  function DayCell({ day }: { day: Date | null }) {
+    if (!day) return <div />;
+    const dStr = format(day, "yyyy-MM-dd");
+    const isSelected = isSameDay(day, selected);
+    const isToday = dStr === todayStr;
+    const hasApts = appointmentDates.has(dStr);
+    const isCurrentMonth = isSameMonth(day, viewMonth);
+    return (
+      <button
+        onClick={() => { onChange(day); setViewMonth(day); if (!expanded) setExpanded(false); }}
+        className={`flex flex-col items-center justify-center h-8 rounded-lg text-xs font-medium transition-all relative ${
+          isSelected
+            ? "bg-primary text-primary-foreground shadow-sm"
+            : isToday
+            ? "border border-primary text-primary"
+            : isCurrentMonth || !expanded
+            ? "hover:bg-muted text-foreground"
+            : "text-muted-foreground/30"
+        }`}
+      >
+        {format(day, "d")}
+        {hasApts && !isSelected && (
+          <span className="absolute bottom-0.5 w-1 h-1 rounded-full bg-primary/70" />
+        )}
+      </button>
+    );
+  }
 
   return (
     <div className="w-full select-none">
-      {/* Month navigation */}
-      <div className="flex items-center justify-between mb-2 px-1">
+      {/* Header row: prev | month label + toggle | next */}
+      <div className="flex items-center justify-between mb-1.5 px-0.5">
+        {expanded ? (
+          <button
+            onClick={() => setViewMonth(m => subMonths(m, 1))}
+            className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-muted transition-colors"
+          >
+            <ChevronLeft className="w-3.5 h-3.5" />
+          </button>
+        ) : (
+          <div className="w-7" />
+        )}
+
         <button
-          onClick={() => setViewMonth(m => subMonths(m, 1))}
-          className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-muted transition-colors"
+          onClick={() => setExpanded(e => !e)}
+          className="flex items-center gap-1 text-xs font-semibold capitalize text-foreground hover:text-primary transition-colors"
         >
-          <ChevronLeft className="w-3.5 h-3.5" />
+          {format(expanded ? viewMonth : selected, "MMMM yyyy", { locale: ptBR })}
+          <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${expanded ? "rotate-180" : ""}`} />
         </button>
-        <button
-          className="text-sm font-semibold capitalize text-foreground hover:text-primary transition-colors"
-          onClick={() => setViewMonth(today)}
-        >
-          {format(viewMonth, "MMMM yyyy", { locale: ptBR })}
-        </button>
-        <button
-          onClick={() => setViewMonth(m => addMonths(m, 1))}
-          className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-muted transition-colors"
-        >
-          <ChevronRight className="w-3.5 h-3.5" />
-        </button>
+
+        {expanded ? (
+          <button
+            onClick={() => setViewMonth(m => addMonths(m, 1))}
+            className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-muted transition-colors"
+          >
+            <ChevronRight className="w-3.5 h-3.5" />
+          </button>
+        ) : (
+          <div className="w-7" />
+        )}
       </div>
 
-      {/* Weekday headers */}
-      <div className="grid grid-cols-7 mb-1">
+      {/* Weekday labels */}
+      <div className="grid grid-cols-7 mb-0.5">
         {weekDays.map((d, i) => (
           <div key={i} className="text-center text-[10px] font-semibold text-muted-foreground py-0.5">
             {d}
@@ -137,42 +183,25 @@ function MiniCalendar({
         ))}
       </div>
 
-      {/* Day grid */}
-      {Array.from({ length: rows }, (_, r) => (
-        <div key={r} className="grid grid-cols-7">
-          {allCells.slice(r * 7, r * 7 + 7).map((day, i) => {
-            if (!day) return <div key={i} />;
-            const dStr = format(day, "yyyy-MM-dd");
-            const isSelected = isSameDay(day, selected);
-            const isToday = dStr === todayStr;
-            const hasApts = appointmentDates.has(dStr);
-            const isCurrentMonth = isSameMonth(day, viewMonth);
-            return (
-              <button
-                key={dStr}
-                onClick={() => {
-                  onChange(day);
-                  setViewMonth(day);
-                }}
-                className={`flex flex-col items-center justify-center h-8 rounded-lg text-xs font-medium transition-all relative ${
-                  isSelected
-                    ? "bg-primary text-primary-foreground shadow-sm"
-                    : isToday
-                    ? "border border-primary text-primary"
-                    : isCurrentMonth
-                    ? "hover:bg-muted text-foreground"
-                    : "text-muted-foreground/40"
-                }`}
-              >
-                {format(day, "d")}
-                {hasApts && !isSelected && (
-                  <span className="absolute bottom-0.5 w-1 h-1 rounded-full bg-primary/70" />
-                )}
-              </button>
-            );
-          })}
+      {/* Collapsed: only current week */}
+      {!expanded && (
+        <div className="grid grid-cols-7">
+          {currentWeek.map((day, i) => <DayCell key={i} day={day} />)}
         </div>
-      ))}
+      )}
+
+      {/* Expanded: full month grid */}
+      {expanded && (
+        <div>
+          {Array.from({ length: rows }, (_, r) => (
+            <div key={r} className="grid grid-cols-7">
+              {allCells.slice(r * 7, r * 7 + 7).map((day, i) => (
+                <DayCell key={i} day={day} />
+              ))}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -325,12 +354,8 @@ export default function CalendarPage() {
       )}
 
       {/* ── Time Grid ── */}
-      <div className="flex-1 bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
-        <div
-          ref={gridRef}
-          className="overflow-y-auto"
-          style={{ height: "calc(100dvh - 420px)", minHeight: 250, scrollbarWidth: "thin" }}
-        >
+      <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
+        <div ref={gridRef}>
           <div style={{ height: DAY_END * HOUR_PX, position: "relative" }} className="flex">
             {/* Time labels */}
             <div className="w-12 shrink-0 relative select-none">
