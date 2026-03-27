@@ -46,11 +46,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 
 /* ─── Constants ─────────────────────────────────────────────── */
-const DAY_START = 0;
-const DAY_END = 24;
+const DAY_START = 8;
+const DAY_END = 20;
 const HOUR_PX = 56;
 const MIN_PX = HOUR_PX / 60;
 const HOURS = Array.from({ length: DAY_END - DAY_START }, (_, i) => DAY_START + i);
+const GRID_OFFSET_PX = DAY_START * HOUR_PX;
 
 const APT_COLORS = [
   "bg-sky-200 text-sky-900 border-sky-300",
@@ -356,7 +357,7 @@ export default function CalendarPage() {
       {/* ── Time Grid ── */}
       <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
         <div ref={gridRef}>
-          <div style={{ height: DAY_END * HOUR_PX, position: "relative" }} className="flex">
+          <div style={{ height: (DAY_END - DAY_START) * HOUR_PX, position: "relative" }} className="flex">
             {/* Time labels */}
             <div className="w-12 shrink-0 relative select-none">
               {HOURS.map(h => (
