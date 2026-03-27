@@ -49,23 +49,9 @@ import * as z from "zod";
 const DAY_START = 8;
 const DAY_END = 20;
 const TOTAL_HOURS = DAY_END - DAY_START;
+const HOUR_PX = 72;
+const MIN_PX = HOUR_PX / 60;
 const HOURS = Array.from({ length: TOTAL_HOURS }, (_, i) => DAY_START + i);
-
-function useHourPx() {
-  const [hourPx, setHourPx] = useState(() => window.innerWidth < 768 ? Math.floor((window.innerHeight - 340) / TOTAL_HOURS) : 56);
-  useEffect(() => {
-    const update = () => {
-      if (window.innerWidth < 768) {
-        setHourPx(Math.max(22, Math.floor((window.innerHeight - 340) / TOTAL_HOURS)));
-      } else {
-        setHourPx(56);
-      }
-    };
-    window.addEventListener("resize", update);
-    return () => window.removeEventListener("resize", update);
-  }, []);
-  return hourPx;
-}
 
 const APT_COLORS = [
   "bg-sky-200 text-sky-900 border-sky-300",
@@ -223,9 +209,6 @@ function MiniCalendar({
 
 /* ─── Main Component ─────────────────────────────────────────── */
 export default function CalendarPage() {
-  const HOUR_PX = useHourPx();
-  const MIN_PX = HOUR_PX / 60;
-
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedApt, setSelectedApt] = useState<any>(null);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -294,22 +277,22 @@ export default function CalendarPage() {
     const startMins = timeToMins(apt.startTime);
     const endMins = timeToMins(apt.endTime);
     const top = startMins * MIN_PX;
-    const height = Math.max((endMins - startMins) * MIN_PX, 24);
+    const height = Math.max((endMins - startMins) * MIN_PX, 28);
     return (
       <button
         onClick={() => setSelectedApt(apt)}
-        style={{ top, height, position: "absolute", left: 2, right: 2 }}
-        className={`rounded-lg px-2 py-1 text-left text-xs font-medium border overflow-hidden shadow-sm hover:brightness-95 active:scale-[0.98] transition-all ${aptColor(apt.status, idx)}`}
+        style={{ top, height, position: "absolute", left: 3, right: 3 }}
+        className={`rounded-lg px-2 py-1.5 text-left text-xs font-medium border overflow-hidden shadow-sm hover:brightness-95 active:scale-[0.98] transition-all flex flex-col justify-start gap-0.5 ${aptColor(apt.status, idx)}`}
       >
-        <div className="font-semibold truncate leading-tight">{apt.serviceName}</div>
-        {height > 30 && (
-          <div className="flex items-center gap-0.5 mt-0.5 opacity-80">
+        <div className="font-bold truncate leading-tight text-[11px]">{apt.serviceName}</div>
+        {height >= 38 && (
+          <div className="flex items-center gap-0.5 opacity-80 leading-none">
             <Clock className="w-2.5 h-2.5 shrink-0" />
-            <span>{apt.startTime} - {apt.endTime}</span>
+            <span className="text-[10px]">{apt.startTime} – {apt.endTime}</span>
           </div>
         )}
-        {height > 46 && apt.clientName && (
-          <div className="truncate opacity-70 mt-0.5">{apt.clientName}</div>
+        {height >= 54 && apt.clientName && (
+          <div className="truncate opacity-75 text-[10px] leading-none">{apt.clientName}</div>
         )}
       </button>
     );
@@ -373,7 +356,7 @@ export default function CalendarPage() {
 
       {/* ── Time Grid ── */}
       <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
-        <div ref={gridRef}>
+        <div ref={gridRef} className="overflow-y-auto" style={{ maxHeight: "55vh" }}>
           <div style={{ height: TOTAL_HOURS * HOUR_PX, position: "relative" }} className="flex">
             {/* Time labels */}
             <div className="w-12 shrink-0 relative select-none">
