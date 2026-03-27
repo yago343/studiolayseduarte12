@@ -5,7 +5,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import { AppLayout } from "@/components/layout/app-layout";
 
-// Pages
 import Dashboard from "./pages/dashboard";
 import CalendarPage from "./pages/calendar";
 import ServicesPage from "./pages/services";
@@ -20,11 +19,12 @@ const queryClient = new QueryClient();
 function Router() {
   return (
     <Switch>
-      {/* Public Route - No Sidebar */}
       <Route path="/agendar" component={PublicBooking} />
       
-      {/* Internal Routes - With Sidebar */}
       <Route path="/">
+        <AppLayout><CalendarPage /></AppLayout>
+      </Route>
+      <Route path="/dashboard">
         <AppLayout><Dashboard /></AppLayout>
       </Route>
       <Route path="/agenda">
@@ -46,7 +46,6 @@ function Router() {
         <AppLayout><SettingsPage /></AppLayout>
       </Route>
       
-      {/* Fallback */}
       <Route>
         <AppLayout><NotFound /></AppLayout>
       </Route>
