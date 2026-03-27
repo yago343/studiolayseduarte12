@@ -48,10 +48,24 @@ import * as z from "zod";
 /* ─── Constants ─────────────────────────────────────────────── */
 const DAY_START = 8;
 const DAY_END = 20;
-const HOUR_PX = 56;
-const MIN_PX = HOUR_PX / 60;
-const HOURS = Array.from({ length: DAY_END - DAY_START }, (_, i) => DAY_START + i);
-const GRID_OFFSET_PX = DAY_START * HOUR_PX;
+const TOTAL_HOURS = DAY_END - DAY_START;
+const HOURS = Array.from({ length: TOTAL_HOURS }, (_, i) => DAY_START + i);
+
+function useHourPx() {
+  const [hourPx, setHourPx] = useState(() => window.innerWidth < 768 ? Math.floor((window.innerHeight - 340) / TOTAL_HOURS) : 56);
+  useEffect(() => {
+    const update = () => {
+      if (window.innerWidth < 768) {
+        setHourPx(Math.max(22, Math.floor((window.innerHeight - 340) / TOTAL_HOURS)));
+      } else {
+        setHourPx(56);
+      }
+    };
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, []);
+  return hourPx;
+}
 
 const APT_COLORS = [
   "bg-sky-200 text-sky-900 border-sky-300",
@@ -209,6 +223,9 @@ function MiniCalendar({
 
 /* ─── Main Component ─────────────────────────────────────────── */
 export default function CalendarPage() {
+  const HOUR_PX = useHourPx();
+  const MIN_PX = HOUR_PX / 60;
+
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedApt, setSelectedApt] = useState<any>(null);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -356,8 +373,8 @@ export default function CalendarPage() {
 
       {/* ── Time Grid ── */}
       <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
-        <div ref={gridRef} className="overflow-y-auto" style={{ maxHeight: "calc(100vh - 320px)", minHeight: 240 }}>
-          <div style={{ height: (DAY_END - DAY_START) * HOUR_PX, position: "relative" }} className="flex">
+        <div ref={gridRef}>
+          <div style={{ height: TOTAL_HOURS * HOUR_PX, position: "relative" }} className="flex">
             {/* Time labels */}
             <div className="w-12 shrink-0 relative select-none">
               {HOURS.map(h => (
