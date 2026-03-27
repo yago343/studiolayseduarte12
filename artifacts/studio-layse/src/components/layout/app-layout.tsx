@@ -245,7 +245,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
       {/* ── Main Content ── */}
       <main className="flex-1 md:ml-60">
-        <div className="pt-14 md:pt-0 pb-16 md:pb-0 p-3 md:p-7 max-w-7xl mx-auto w-full min-h-[calc(100vh-3.5rem)] md:min-h-screen overflow-x-hidden">
+        <div className="pt-16 pb-16 px-3 md:pt-7 md:pb-7 md:px-7 max-w-7xl mx-auto w-full overflow-x-hidden">
           <motion.div
             key={location}
             initial={{ opacity: 0, y: 5 }}

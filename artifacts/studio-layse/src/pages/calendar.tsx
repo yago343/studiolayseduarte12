@@ -153,8 +153,8 @@ export default function CalendarPage() {
     if (view === "month") {
       return eachDayOfInterval({ start: monthStart, end: monthEnd });
     }
-    // show 14 days around current week
-    return Array.from({ length: 14 }, (_, i) => addDays(weekStart, i - 3));
+    // show only the 7 days of the current week (Mon–Sun), no repetition
+    return Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
   })();
 
   /* ─── Navigate ───────────────────────────────────────────────── */
@@ -252,10 +252,10 @@ export default function CalendarPage() {
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
 
   return (
-    <div className="flex flex-col gap-0 md:gap-4">
+    <div className="flex flex-col gap-0 md:gap-4 w-full overflow-x-hidden">
 
       {/* ── Top toolbar ── */}
-      <div className="pb-3 flex flex-col gap-3">
+      <div className="pb-3 flex flex-col gap-3 w-full">
 
         {/* Row 1: Title + actions (desktop) */}
         <div className="hidden md:flex items-center justify-between">
@@ -268,15 +268,14 @@ export default function CalendarPage() {
           </Button>
         </div>
 
-        {/* Row 2: View tabs + nav */}
-        <div className="flex items-center justify-between gap-2">
-          {/* View tabs — pill style like reference */}
-          <div className="flex items-center bg-muted rounded-full p-0.5 text-sm">
+        {/* Row 2 (mobile): view tabs + add button */}
+        <div className="flex items-center justify-between md:hidden">
+          <div className="flex items-center bg-muted rounded-full p-0.5">
             {(["day", "week", "month"] as ViewMode[]).map(v => (
               <button
                 key={v}
                 onClick={() => setView(v)}
-                className={`px-3 sm:px-4 py-1.5 rounded-full font-medium transition-all ${
+                className={`px-3 py-1.5 rounded-full font-medium transition-all text-xs ${
                   view === v ? "bg-background text-foreground shadow-sm" : "text-muted-foreground"
                 }`}
               >
@@ -284,44 +283,75 @@ export default function CalendarPage() {
               </button>
             ))}
           </div>
+          <button
+            onClick={() => setIsCreateOpen(true)}
+            className="w-8 h-8 flex items-center justify-center rounded-full bg-primary text-primary-foreground shadow-md"
+          >
+            <Plus className="w-4 h-4" />
+          </button>
+        </div>
 
-          {/* Date label + navigation */}
+        {/* Row 2 (desktop): view tabs + date + new button */}
+        <div className="hidden md:flex items-center gap-3">
+          <div className="flex items-center bg-muted rounded-full p-0.5">
+            {(["day", "week", "month"] as ViewMode[]).map(v => (
+              <button
+                key={v}
+                onClick={() => setView(v)}
+                className={`px-4 py-1.5 rounded-full font-medium transition-all text-sm ${
+                  view === v ? "bg-background text-foreground shadow-sm" : "text-muted-foreground"
+                }`}
+              >
+                {v === "day" ? "Dia" : v === "week" ? "Semana" : "Mês"}
+              </button>
+            ))}
+          </div>
+          <div className="flex-1" />
           <div className="flex items-center gap-1.5">
+            <button onClick={prev} className="w-7 h-7 flex items-center justify-center rounded-full border border-border hover:bg-muted transition-colors">
+              <ChevronLeft className="w-3.5 h-3.5" />
+            </button>
             <span className="text-sm font-semibold capitalize text-foreground">
               {view === "day"
                 ? format(currentDate, "d MMMM", { locale: ptBR })
                 : view === "week"
                 ? format(weekStart, "d MMM", { locale: ptBR }) + " – " + format(addDays(weekStart, 6), "d MMM", { locale: ptBR })
                 : format(currentDate, "MMMM yyyy", { locale: ptBR })}
-              {" "}
-              <span className="text-primary font-bold">
-                {format(currentDate, "yyyy")}
-              </span>
+              {" "}<span className="text-primary font-bold">{format(currentDate, "yyyy")}</span>
             </span>
-            <button onClick={prev} className="w-7 h-7 flex items-center justify-center rounded-full border border-border hover:bg-muted transition-colors">
-              <ChevronLeft className="w-3.5 h-3.5" />
-            </button>
-            <button onClick={() => setCurrentDate(new Date())} className="hidden sm:block px-2.5 h-7 rounded-full border border-border text-xs font-medium hover:bg-muted transition-colors">
+            <button onClick={() => setCurrentDate(new Date())} className="px-2.5 h-7 rounded-full border border-border text-xs font-medium hover:bg-muted transition-colors">
               Hoje
             </button>
             <button onClick={next} className="w-7 h-7 flex items-center justify-center rounded-full border border-border hover:bg-muted transition-colors">
               <ChevronRight className="w-3.5 h-3.5" />
             </button>
           </div>
+        </div>
 
-          {/* Mobile new button */}
-          <button
-            onClick={() => setIsCreateOpen(true)}
-            className="md:hidden w-8 h-8 flex items-center justify-center rounded-full bg-primary text-primary-foreground shadow-md"
-          >
-            <Plus className="w-4 h-4" />
+        {/* Row 3 (mobile only): date navigation */}
+        <div className="flex items-center justify-center gap-2 md:hidden">
+          <button onClick={prev} className="w-7 h-7 flex items-center justify-center rounded-full border border-border hover:bg-muted transition-colors">
+            <ChevronLeft className="w-3.5 h-3.5" />
+          </button>
+          <span className="text-sm font-semibold capitalize text-foreground">
+            {view === "day"
+              ? format(currentDate, "d 'de' MMMM", { locale: ptBR })
+              : view === "week"
+              ? format(weekStart, "d MMM", { locale: ptBR }) + " – " + format(addDays(weekStart, 6), "d MMM yyyy", { locale: ptBR })
+              : format(currentDate, "MMMM yyyy", { locale: ptBR })}
+          </span>
+          <button onClick={() => setCurrentDate(new Date())} className="px-2 h-6 rounded-full border border-border text-[10px] font-medium hover:bg-muted transition-colors text-muted-foreground">
+            Hoje
+          </button>
+          <button onClick={next} className="w-7 h-7 flex items-center justify-center rounded-full border border-border hover:bg-muted transition-colors">
+            <ChevronRight className="w-3.5 h-3.5" />
           </button>
         </div>
 
-        {/* Day strip — horizontal scrollable */}
+        {/* Day strip — horizontal scrollable, constrained to full width */}
         <div
           ref={dayStripRef}
-          className="flex gap-1 overflow-x-auto scrollbar-none pb-1"
+          className="flex gap-1 overflow-x-auto scrollbar-none pb-1 w-full"
           style={{ scrollbarWidth: "none" }}
         >
           {stripDays.map(day => {
@@ -357,7 +387,7 @@ export default function CalendarPage() {
 
       {/* ── MONTH VIEW ── */}
       {view === "month" && (
-        <div className="flex-1 overflow-auto px-4 md:px-0">
+        <div className="flex-1 overflow-x-hidden w-full">
           <div className="bg-card border border-border rounded-xl overflow-hidden">
             {/* Weekday headers */}
             <div className="grid grid-cols-7 border-b border-border bg-muted/40">
@@ -412,12 +442,12 @@ export default function CalendarPage() {
 
       {/* ── DAY VIEW (mobile-first time grid) ── */}
       {view === "day" && (
-        <div className="px-2 md:px-0">
+        <div className="w-full">
           <div className="bg-card md:border md:border-border md:rounded-xl overflow-hidden">
             <div
               ref={gridRef}
               className="overflow-y-auto"
-              style={{ height: "calc(100vh - 280px)", minHeight: 400, scrollbarWidth: "thin" }}
+              style={{ height: "calc(100dvh - 260px)", minHeight: 320, scrollbarWidth: "thin" }}
             >
               <div style={{ height: (DAY_END - DAY_START) * HOUR_PX, position: "relative" }}>
                 <TimeColumn
@@ -433,7 +463,7 @@ export default function CalendarPage() {
 
       {/* ── WEEK VIEW (desktop: grid, mobile: scrollable 3-col) ── */}
       {view === "week" && (
-        <div className="px-2 md:px-0 flex flex-col" style={{ height: "calc(100vh - 260px)", minHeight: 400 }}>
+        <div className="w-full flex flex-col" style={{ height: "calc(100dvh - 260px)", minHeight: 320 }}>
           {/* Desktop: 7-col header */}
           <div className="hidden md:grid grid-cols-7 border border-border rounded-t-xl bg-muted/40 overflow-hidden">
             {weekDays.map((day, i) => {
