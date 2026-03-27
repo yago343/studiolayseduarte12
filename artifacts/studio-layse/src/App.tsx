@@ -13,6 +13,7 @@ import FinancesPage from "./pages/finances";
 import SchedulePage from "./pages/schedule";
 import SettingsPage from "./pages/settings";
 import PublicBooking from "./pages/public-booking";
+import GalleryPage from "./pages/gallery";
 
 const queryClient = new QueryClient();
 
@@ -44,6 +45,9 @@ function Router() {
       </Route>
       <Route path="/configuracoes">
         <AppLayout><SettingsPage /></AppLayout>
+      </Route>
+      <Route path="/galeria">
+        <AppLayout><GalleryPage /></AppLayout>
       </Route>
       
       <Route>

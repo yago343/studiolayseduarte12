@@ -6,6 +6,7 @@ import appointmentsRouter from "./appointments";
 import financesRouter from "./finances";
 import dashboardRouter from "./dashboard";
 import settingsRouter from "./settings";
+import imagesRouter from "./images";
 
 const router: IRouter = Router();
 
@@ -15,6 +16,7 @@ router.use("/clients", clientsRouter);
 router.use("/appointments", appointmentsRouter);
 router.use("/finances", financesRouter);
 router.use("/dashboard", dashboardRouter);
+router.use("/images", imagesRouter);
 router.use(settingsRouter); // settings, schedule, availability, public/book are mounted directly
 
 export default router;
