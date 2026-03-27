@@ -160,13 +160,13 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       </AnimatePresence>
 
       {/* Main Content */}
-      <main className="flex-1 md:pl-64 min-h-screen">
+      <main className="flex-1 md:pl-64 min-h-screen pt-14 md:pt-0">
         <div className="p-4 md:p-8 max-w-7xl mx-auto w-full h-full">
           <motion.div
             key={location}
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.25 }}
           >
             {children}
           </motion.div>
