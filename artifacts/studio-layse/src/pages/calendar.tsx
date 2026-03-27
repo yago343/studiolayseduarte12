@@ -50,9 +50,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 
 /* ─── Constants ─────────────────────────────────────────────── */
-const DAY_START = 7;   // 7:00
-const DAY_END = 20;    // 20:00
-const HOUR_PX = 64;    // px per hour
+const DAY_START = 0;   // 00:00
+const DAY_END = 24;    // 24:00
+const HOUR_PX = 56;    // px per hour
 const MIN_PX = HOUR_PX / 60;
 const HOURS = Array.from({ length: DAY_END - DAY_START }, (_, i) => DAY_START + i);
 
@@ -130,10 +130,12 @@ export default function CalendarPage() {
     defaultValues: { date: format(currentDate, "yyyy-MM-dd"), startTime: "09:00" },
   });
 
-  /* Scroll to 8am on mount */
+  /* Scroll to current hour on mount */
   useEffect(() => {
     if (gridRef.current) {
-      gridRef.current.scrollTop = (8 - DAY_START) * HOUR_PX;
+      const now = new Date();
+      const scrollHour = Math.max(0, now.getHours() - 1);
+      gridRef.current.scrollTop = scrollHour * HOUR_PX;
     }
   }, [view]);
 
@@ -255,9 +257,53 @@ export default function CalendarPage() {
     <div className="flex flex-col gap-0 md:gap-4 w-full overflow-x-hidden">
 
       {/* ── Top toolbar ── */}
-      <div className="pb-3 flex flex-col gap-3 w-full">
+      <div className="pb-2 flex flex-col gap-1.5 w-full">
 
-        {/* Row 1: Title + actions (desktop) */}
+        {/* MOBILE: single compact row — view pills + date + nav + add */}
+        <div className="flex items-center gap-1.5 md:hidden">
+          {/* View tabs */}
+          <div className="flex items-center bg-muted rounded-full p-0.5 shrink-0">
+            {(["day", "week", "month"] as ViewMode[]).map(v => (
+              <button
+                key={v}
+                onClick={() => setView(v)}
+                className={`px-2.5 py-1 rounded-full font-medium transition-all text-[10px] ${
+                  view === v ? "bg-background text-foreground shadow-sm" : "text-muted-foreground"
+                }`}
+              >
+                {v === "day" ? "Dia" : v === "week" ? "Sem" : "Mês"}
+              </button>
+            ))}
+          </div>
+
+          {/* Date navigation */}
+          <button onClick={prev} className="w-6 h-6 flex items-center justify-center rounded-full border border-border hover:bg-muted transition-colors shrink-0">
+            <ChevronLeft className="w-3 h-3" />
+          </button>
+          <span className="flex-1 text-center text-xs font-semibold capitalize text-foreground truncate">
+            {view === "day"
+              ? format(currentDate, "d 'de' MMM", { locale: ptBR })
+              : view === "week"
+              ? format(weekStart, "d MMM", { locale: ptBR }) + "–" + format(addDays(weekStart, 6), "d MMM", { locale: ptBR })
+              : format(currentDate, "MMM yyyy", { locale: ptBR })}
+          </span>
+          <button onClick={next} className="w-6 h-6 flex items-center justify-center rounded-full border border-border hover:bg-muted transition-colors shrink-0">
+            <ChevronRight className="w-3 h-3" />
+          </button>
+          <button onClick={() => setCurrentDate(new Date())} className="px-2 h-6 rounded-full border border-border text-[9px] font-medium hover:bg-muted transition-colors text-muted-foreground shrink-0">
+            Hoje
+          </button>
+
+          {/* Add button */}
+          <button
+            onClick={() => setIsCreateOpen(true)}
+            className="w-7 h-7 flex items-center justify-center rounded-full bg-primary text-primary-foreground shadow-md shrink-0"
+          >
+            <Plus className="w-3.5 h-3.5" />
+          </button>
+        </div>
+
+        {/* DESKTOP: Row 1 — title + new button */}
         <div className="hidden md:flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-foreground">Agenda</h1>
@@ -268,30 +314,7 @@ export default function CalendarPage() {
           </Button>
         </div>
 
-        {/* Row 2 (mobile): view tabs + add button */}
-        <div className="flex items-center justify-between md:hidden">
-          <div className="flex items-center bg-muted rounded-full p-0.5">
-            {(["day", "week", "month"] as ViewMode[]).map(v => (
-              <button
-                key={v}
-                onClick={() => setView(v)}
-                className={`px-3 py-1.5 rounded-full font-medium transition-all text-xs ${
-                  view === v ? "bg-background text-foreground shadow-sm" : "text-muted-foreground"
-                }`}
-              >
-                {v === "day" ? "Dia" : v === "week" ? "Semana" : "Mês"}
-              </button>
-            ))}
-          </div>
-          <button
-            onClick={() => setIsCreateOpen(true)}
-            className="w-8 h-8 flex items-center justify-center rounded-full bg-primary text-primary-foreground shadow-md"
-          >
-            <Plus className="w-4 h-4" />
-          </button>
-        </div>
-
-        {/* Row 2 (desktop): view tabs + date + new button */}
+        {/* DESKTOP: Row 2 — view tabs + date nav */}
         <div className="hidden md:flex items-center gap-3">
           <div className="flex items-center bg-muted rounded-full p-0.5">
             {(["day", "week", "month"] as ViewMode[]).map(v => (
@@ -328,30 +351,10 @@ export default function CalendarPage() {
           </div>
         </div>
 
-        {/* Row 3 (mobile only): date navigation */}
-        <div className="flex items-center justify-center gap-2 md:hidden">
-          <button onClick={prev} className="w-7 h-7 flex items-center justify-center rounded-full border border-border hover:bg-muted transition-colors">
-            <ChevronLeft className="w-3.5 h-3.5" />
-          </button>
-          <span className="text-sm font-semibold capitalize text-foreground">
-            {view === "day"
-              ? format(currentDate, "d 'de' MMMM", { locale: ptBR })
-              : view === "week"
-              ? format(weekStart, "d MMM", { locale: ptBR }) + " – " + format(addDays(weekStart, 6), "d MMM yyyy", { locale: ptBR })
-              : format(currentDate, "MMMM yyyy", { locale: ptBR })}
-          </span>
-          <button onClick={() => setCurrentDate(new Date())} className="px-2 h-6 rounded-full border border-border text-[10px] font-medium hover:bg-muted transition-colors text-muted-foreground">
-            Hoje
-          </button>
-          <button onClick={next} className="w-7 h-7 flex items-center justify-center rounded-full border border-border hover:bg-muted transition-colors">
-            <ChevronRight className="w-3.5 h-3.5" />
-          </button>
-        </div>
-
-        {/* Day strip — horizontal scrollable, constrained to full width */}
+        {/* Day strip — horizontal scrollable, compact on mobile */}
         <div
           ref={dayStripRef}
-          className="flex gap-1 overflow-x-auto scrollbar-none pb-1 w-full"
+          className="flex gap-1 overflow-x-auto scrollbar-none pb-0.5 w-full"
           style={{ scrollbarWidth: "none" }}
         >
           {stripDays.map(day => {
@@ -364,7 +367,7 @@ export default function CalendarPage() {
                 key={dStr}
                 data-today={isSelected ? "true" : undefined}
                 onClick={() => setCurrentDate(day)}
-                className={`flex flex-col items-center justify-center min-w-[42px] h-[54px] rounded-xl text-xs font-medium transition-all shrink-0 ${
+                className={`flex flex-col items-center justify-center min-w-[38px] h-[46px] md:min-w-[42px] md:h-[54px] rounded-xl text-xs font-medium transition-all shrink-0 ${
                   isSelected
                     ? "bg-primary text-primary-foreground shadow-md"
                     : isToday
@@ -372,10 +375,10 @@ export default function CalendarPage() {
                     : "text-muted-foreground hover:bg-muted"
                 }`}
               >
-                <span className="uppercase text-[10px] tracking-wide opacity-80">
+                <span className="uppercase text-[9px] md:text-[10px] tracking-wide opacity-80">
                   {DAY_ABBR[getDay(day)]}
                 </span>
-                <span className="text-base font-bold mt-0.5">{format(day, "d")}</span>
+                <span className="text-sm md:text-base font-bold mt-0.5">{format(day, "d")}</span>
                 {hasApts && !isSelected && (
                   <div className="w-1 h-1 rounded-full bg-primary/60 mt-0.5" />
                 )}
@@ -447,7 +450,7 @@ export default function CalendarPage() {
             <div
               ref={gridRef}
               className="overflow-y-auto"
-              style={{ height: "calc(100dvh - 260px)", minHeight: 320, scrollbarWidth: "thin" }}
+              style={{ height: "calc(100dvh - 200px)", minHeight: 320, scrollbarWidth: "thin" }}
             >
               <div style={{ height: (DAY_END - DAY_START) * HOUR_PX, position: "relative" }}>
                 <TimeColumn
@@ -463,7 +466,7 @@ export default function CalendarPage() {
 
       {/* ── WEEK VIEW (desktop: grid, mobile: scrollable 3-col) ── */}
       {view === "week" && (
-        <div className="w-full flex flex-col" style={{ height: "calc(100dvh - 260px)", minHeight: 320 }}>
+        <div className="w-full flex flex-col" style={{ height: "calc(100dvh - 200px)", minHeight: 320 }}>
           {/* Desktop: 7-col header */}
           <div className="hidden md:grid grid-cols-7 border border-border rounded-t-xl bg-muted/40 overflow-hidden">
             {weekDays.map((day, i) => {
