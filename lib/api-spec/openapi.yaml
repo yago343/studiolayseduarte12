@@ -1,22 +1,33 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Studio Layse Duarte API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: services
+    description: Beauty services
+  - name: clients
+    description: Client management
+  - name: appointments
+    description: Appointment scheduling
+  - name: finances
+    description: Financial management
+  - name: settings
+    description: Studio settings
+  - name: schedule
+    description: Working hours
+
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +35,564 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /services:
+    get:
+      operationId: listServices
+      tags: [services]
+      summary: List all services
+      responses:
+        "200":
+          description: List of services
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Service"
+    post:
+      operationId: createService
+      tags: [services]
+      summary: Create a service
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateServiceInput"
+      responses:
+        "201":
+          description: Created service
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Service"
+
+  /services/{id}:
+    get:
+      operationId: getService
+      tags: [services]
+      summary: Get a service by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Service
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Service"
+    put:
+      operationId: updateService
+      tags: [services]
+      summary: Update a service
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateServiceInput"
+      responses:
+        "200":
+          description: Updated service
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Service"
+    delete:
+      operationId: deleteService
+      tags: [services]
+      summary: Delete a service
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /clients:
+    get:
+      operationId: listClients
+      tags: [clients]
+      summary: List all clients
+      responses:
+        "200":
+          description: List of clients
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Client"
+    post:
+      operationId: createClient
+      tags: [clients]
+      summary: Create a client
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateClientInput"
+      responses:
+        "201":
+          description: Created client
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Client"
+
+  /clients/{id}:
+    get:
+      operationId: getClient
+      tags: [clients]
+      summary: Get a client by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Client with appointment history
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClientWithHistory"
+    put:
+      operationId: updateClient
+      tags: [clients]
+      summary: Update a client
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateClientInput"
+      responses:
+        "200":
+          description: Updated client
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Client"
+    delete:
+      operationId: deleteClient
+      tags: [clients]
+      summary: Delete a client
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /appointments:
+    get:
+      operationId: listAppointments
+      tags: [appointments]
+      summary: List appointments
+      parameters:
+        - name: startDate
+          in: query
+          schema:
+            type: string
+        - name: endDate
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of appointments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Appointment"
+    post:
+      operationId: createAppointment
+      tags: [appointments]
+      summary: Create an appointment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAppointmentInput"
+      responses:
+        "201":
+          description: Created appointment
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Appointment"
+
+  /appointments/{id}:
+    get:
+      operationId: getAppointment
+      tags: [appointments]
+      summary: Get an appointment by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Appointment
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Appointment"
+    put:
+      operationId: updateAppointment
+      tags: [appointments]
+      summary: Update an appointment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateAppointmentInput"
+      responses:
+        "200":
+          description: Updated appointment
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Appointment"
+    delete:
+      operationId: deleteAppointment
+      tags: [appointments]
+      summary: Delete an appointment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /appointments/{id}/status:
+    patch:
+      operationId: updateAppointmentStatus
+      tags: [appointments]
+      summary: Update appointment status
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateStatusInput"
+      responses:
+        "200":
+          description: Updated appointment
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Appointment"
+
+  /finances/incomes:
+    get:
+      operationId: listIncomes
+      tags: [finances]
+      summary: List incomes
+      parameters:
+        - name: startDate
+          in: query
+          schema:
+            type: string
+        - name: endDate
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of incomes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Income"
+    post:
+      operationId: createIncome
+      tags: [finances]
+      summary: Create an income record
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateIncomeInput"
+      responses:
+        "201":
+          description: Created income
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Income"
+
+  /finances/incomes/{id}:
+    delete:
+      operationId: deleteIncome
+      tags: [finances]
+      summary: Delete an income record
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /finances/expenses:
+    get:
+      operationId: listExpenses
+      tags: [finances]
+      summary: List expenses
+      parameters:
+        - name: startDate
+          in: query
+          schema:
+            type: string
+        - name: endDate
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of expenses
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Expense"
+    post:
+      operationId: createExpense
+      tags: [finances]
+      summary: Create an expense record
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateExpenseInput"
+      responses:
+        "201":
+          description: Created expense
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Expense"
+
+  /finances/expenses/{id}:
+    delete:
+      operationId: deleteExpense
+      tags: [finances]
+      summary: Delete an expense record
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /finances/summary:
+    get:
+      operationId: getFinancialSummary
+      tags: [finances]
+      summary: Get financial summary
+      parameters:
+        - name: startDate
+          in: query
+          schema:
+            type: string
+        - name: endDate
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Financial summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FinancialSummary"
+
+  /dashboard:
+    get:
+      operationId: getDashboard
+      tags: [finances]
+      summary: Get dashboard stats
+      responses:
+        "200":
+          description: Dashboard data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardData"
+
+  /settings:
+    get:
+      operationId: getSettings
+      tags: [settings]
+      summary: Get studio settings
+      responses:
+        "200":
+          description: Settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Settings"
+    put:
+      operationId: updateSettings
+      tags: [settings]
+      summary: Update studio settings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateSettingsInput"
+      responses:
+        "200":
+          description: Updated settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Settings"
+
+  /schedule:
+    get:
+      operationId: getSchedule
+      tags: [schedule]
+      summary: Get working hours schedule
+      responses:
+        "200":
+          description: Schedule
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/WorkingHours"
+    put:
+      operationId: updateSchedule
+      tags: [schedule]
+      summary: Update working hours
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: "#/components/schemas/UpdateWorkingHoursInput"
+      responses:
+        "200":
+          description: Updated schedule
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/WorkingHours"
+
+  /availability:
+    get:
+      operationId: getAvailability
+      tags: [schedule]
+      summary: Get available time slots for a date
+      parameters:
+        - name: date
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: serviceId
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Available slots
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+
+  /public/book:
+    post:
+      operationId: publicBook
+      tags: [appointments]
+      summary: Public booking endpoint
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PublicBookingInput"
+      responses:
+        "201":
+          description: Booking created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Appointment"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +603,543 @@ components:
       required:
         - status
 
+    Service:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        price:
+          type: number
+        durationMinutes:
+          type: integer
+        createdAt:
+          type: string
+      required:
+        - id
+        - name
+        - price
+        - durationMinutes
+        - createdAt
+
+    CreateServiceInput:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        price:
+          type: number
+        durationMinutes:
+          type: integer
+      required:
+        - name
+        - price
+        - durationMinutes
+
+    Client:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        phone:
+          type: string
+          nullable: true
+        email:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+        totalAppointments:
+          type: integer
+        lastAppointment:
+          type: string
+          nullable: true
+      required:
+        - id
+        - name
+        - createdAt
+        - totalAppointments
+
+    ClientWithHistory:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        phone:
+          type: string
+          nullable: true
+        email:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+        appointments:
+          type: array
+          items:
+            $ref: "#/components/schemas/Appointment"
+      required:
+        - id
+        - name
+        - createdAt
+        - appointments
+
+    CreateClientInput:
+      type: object
+      properties:
+        name:
+          type: string
+        phone:
+          type: string
+          nullable: true
+        email:
+          type: string
+          nullable: true
+      required:
+        - name
+
+    Appointment:
+      type: object
+      properties:
+        id:
+          type: integer
+        clientId:
+          type: integer
+          nullable: true
+        clientName:
+          type: string
+        clientPhone:
+          type: string
+          nullable: true
+        serviceId:
+          type: integer
+        serviceName:
+          type: string
+        servicePrice:
+          type: number
+        date:
+          type: string
+        startTime:
+          type: string
+        endTime:
+          type: string
+        status:
+          type: string
+          enum: [confirmed, cancelled, completed, blocked]
+        notes:
+          type: string
+          nullable: true
+        paymentMethod:
+          type: string
+          nullable: true
+          enum: [pix, cash, card, null]
+        createdAt:
+          type: string
+      required:
+        - id
+        - clientName
+        - serviceId
+        - serviceName
+        - servicePrice
+        - date
+        - startTime
+        - endTime
+        - status
+        - createdAt
+
+    CreateAppointmentInput:
+      type: object
+      properties:
+        clientId:
+          type: integer
+          nullable: true
+        clientName:
+          type: string
+        clientPhone:
+          type: string
+          nullable: true
+        serviceId:
+          type: integer
+        date:
+          type: string
+        startTime:
+          type: string
+        notes:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum: [confirmed, cancelled, completed, blocked]
+      required:
+        - clientName
+        - serviceId
+        - date
+        - startTime
+
+    UpdateAppointmentInput:
+      type: object
+      properties:
+        clientId:
+          type: integer
+          nullable: true
+        clientName:
+          type: string
+        clientPhone:
+          type: string
+          nullable: true
+        serviceId:
+          type: integer
+        date:
+          type: string
+        startTime:
+          type: string
+        notes:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum: [confirmed, cancelled, completed, blocked]
+        paymentMethod:
+          type: string
+          nullable: true
+          enum: [pix, cash, card, null]
+
+    UpdateStatusInput:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [confirmed, cancelled, completed, blocked]
+        paymentMethod:
+          type: string
+          nullable: true
+          enum: [pix, cash, card, null]
+      required:
+        - status
+
+    Income:
+      type: object
+      properties:
+        id:
+          type: integer
+        appointmentId:
+          type: integer
+          nullable: true
+        serviceName:
+          type: string
+        amount:
+          type: number
+        paymentMethod:
+          type: string
+          enum: [pix, cash, card]
+        date:
+          type: string
+        clientName:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+      required:
+        - id
+        - serviceName
+        - amount
+        - paymentMethod
+        - date
+        - createdAt
+
+    CreateIncomeInput:
+      type: object
+      properties:
+        appointmentId:
+          type: integer
+          nullable: true
+        serviceName:
+          type: string
+        amount:
+          type: number
+        paymentMethod:
+          type: string
+          enum: [pix, cash, card]
+        date:
+          type: string
+        clientName:
+          type: string
+          nullable: true
+      required:
+        - serviceName
+        - amount
+        - paymentMethod
+        - date
+
+    Expense:
+      type: object
+      properties:
+        id:
+          type: integer
+        description:
+          type: string
+        amount:
+          type: number
+        category:
+          type: string
+        date:
+          type: string
+        createdAt:
+          type: string
+      required:
+        - id
+        - description
+        - amount
+        - category
+        - date
+        - createdAt
+
+    CreateExpenseInput:
+      type: object
+      properties:
+        description:
+          type: string
+        amount:
+          type: number
+        category:
+          type: string
+        date:
+          type: string
+      required:
+        - description
+        - amount
+        - category
+        - date
+
+    FinancialSummary:
+      type: object
+      properties:
+        totalIncome:
+          type: number
+        totalExpenses:
+          type: number
+        netProfit:
+          type: number
+        incomeByPaymentMethod:
+          type: object
+          properties:
+            pix:
+              type: number
+            cash:
+              type: number
+            card:
+              type: number
+          required:
+            - pix
+            - cash
+            - card
+        expensesByCategory:
+          type: array
+          items:
+            type: object
+            properties:
+              category:
+                type: string
+              total:
+                type: number
+            required:
+              - category
+              - total
+        dailyRevenue:
+          type: array
+          items:
+            type: object
+            properties:
+              date:
+                type: string
+              amount:
+                type: number
+            required:
+              - date
+              - amount
+      required:
+        - totalIncome
+        - totalExpenses
+        - netProfit
+        - incomeByPaymentMethod
+        - expensesByCategory
+        - dailyRevenue
+
+    DashboardData:
+      type: object
+      properties:
+        todayRevenue:
+          type: number
+        weekRevenue:
+          type: number
+        monthRevenue:
+          type: number
+        todayAppointments:
+          type: integer
+        weekAppointments:
+          type: integer
+        monthAppointments:
+          type: integer
+        averageTicket:
+          type: number
+        upcomingAppointments:
+          type: array
+          items:
+            $ref: "#/components/schemas/Appointment"
+        topServices:
+          type: array
+          items:
+            type: object
+            properties:
+              serviceName:
+                type: string
+              count:
+                type: integer
+              revenue:
+                type: number
+            required:
+              - serviceName
+              - count
+              - revenue
+        monthlyRevenue:
+          type: array
+          items:
+            type: object
+            properties:
+              month:
+                type: string
+              amount:
+                type: number
+            required:
+              - month
+              - amount
+      required:
+        - todayRevenue
+        - weekRevenue
+        - monthRevenue
+        - todayAppointments
+        - weekAppointments
+        - monthAppointments
+        - averageTicket
+        - upcomingAppointments
+        - topServices
+        - monthlyRevenue
+
+    Settings:
+      type: object
+      properties:
+        studioName:
+          type: string
+        primaryColor:
+          type: string
+        welcomeMessage:
+          type: string
+          nullable: true
+        bookingMessage:
+          type: string
+          nullable: true
+      required:
+        - studioName
+        - primaryColor
+
+    UpdateSettingsInput:
+      type: object
+      properties:
+        studioName:
+          type: string
+        primaryColor:
+          type: string
+        welcomeMessage:
+          type: string
+          nullable: true
+        bookingMessage:
+          type: string
+          nullable: true
+
+    WorkingHours:
+      type: object
+      properties:
+        id:
+          type: integer
+        dayOfWeek:
+          type: integer
+        dayName:
+          type: string
+        isOpen:
+          type: boolean
+        openTime:
+          type: string
+          nullable: true
+        closeTime:
+          type: string
+          nullable: true
+        breakStart:
+          type: string
+          nullable: true
+        breakEnd:
+          type: string
+          nullable: true
+      required:
+        - id
+        - dayOfWeek
+        - dayName
+        - isOpen
+
+    UpdateWorkingHoursInput:
+      type: object
+      properties:
+        dayOfWeek:
+          type: integer
+        isOpen:
+          type: boolean
+        openTime:
+          type: string
+          nullable: true
+        closeTime:
+          type: string
+          nullable: true
+        breakStart:
+          type: string
+          nullable: true
+        breakEnd:
+          type: string
+          nullable: true
+      required:
+        - dayOfWeek
+        - isOpen
+
+    PublicBookingInput:
+      type: object
+      properties:
+        clientName:
+          type: string
+        clientPhone:
+          type: string
+          nullable: true
+        clientEmail:
+          type: string
+          nullable: true
+        serviceId:
+          type: integer
+        date:
+          type: string
+        startTime:
+          type: string
+        notes:
+          type: string
+          nullable: true
+      required:
+        - clientName
+        - serviceId
+        - date
+        - startTime
