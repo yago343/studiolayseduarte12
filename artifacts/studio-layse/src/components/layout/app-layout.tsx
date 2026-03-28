@@ -13,7 +13,6 @@ import {
   Scissors,
   Menu,
   X,
-  Images,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
@@ -25,7 +24,6 @@ const navigation = [
   { name: 'Serviços',      href: '/servicos',      icon: Sparkles },
   { name: 'Financeiro',    href: '/financeiro',    icon: Wallet },
   { name: 'Horários',      href: '/horarios',      icon: Clock },
-  { name: 'Galeria',       href: '/galeria',       icon: Images },
   { name: 'Configurações', href: '/configuracoes', icon: Settings },
 ];
 
