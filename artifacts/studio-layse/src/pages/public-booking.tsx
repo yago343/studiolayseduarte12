@@ -4,10 +4,9 @@ import { useGetSettings, useListServices } from "@workspace/api-client-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Calendar as CalIcon, Clock, User, CheckCircle2, Check, Plus, X, LogOut } from "lucide-react";
+import { Calendar as CalIcon, Clock, User, CheckCircle2, Check, Plus, X } from "lucide-react";
 import { format, addDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { useAuth } from "@/contexts/auth-context";
 
 type AvailabilitySlot = { time: string; available: boolean; reason?: string };
 
@@ -38,8 +37,6 @@ async function submitBooking(data: {
 export default function PublicBooking() {
   const { data: settings } = useGetSettings();
   const { data: services } = useListServices();
-  const { user, signOut } = useAuth();
-
   const [step, setStep] = useState(1);
   const [selectedServices, setSelectedServices] = useState<number[]>([]);
 
@@ -54,9 +51,9 @@ export default function PublicBooking() {
 
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [formData, setFormData] = useState({
-    name: user?.name || "",
-    phone: user?.phone || "",
-    email: user?.email || "",
+    name: "",
+    phone: "",
+    email: "",
   });
   const [showAddService, setShowAddService] = useState(false);
 
@@ -102,17 +99,6 @@ export default function PublicBooking() {
       </div>
 
       <div className="relative z-10 max-w-2xl mx-auto pt-16 px-4">
-        {user && (
-          <div className="flex justify-end mb-2">
-            <button
-              onClick={signOut}
-              className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors bg-card/60 backdrop-blur px-3 py-1.5 rounded-full border border-border/40"
-            >
-              <LogOut className="w-3.5 h-3.5" />
-              Sair ({user.name || user.email})
-            </button>
-          </div>
-        )}
 
         <div className="text-center mb-10">
           {publicLogo ? (
@@ -464,7 +450,7 @@ export default function PublicBooking() {
                     setStep(1);
                     setSelectedServices([]);
                     setSelectedTime(null);
-                    setFormData({ name: user?.name || "", phone: user?.phone || "", email: user?.email || "" });
+                    setFormData({ name: "", phone: "", email: "" });
                     setShowAddService(false);
                   }}
                   variant="outline"
