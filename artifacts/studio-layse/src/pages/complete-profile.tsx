@@ -7,6 +7,16 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
+async function saveUserToDb(name: string, phone: string, email: string) {
+  try {
+    await fetch("/api/public/register-user", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, phone, email }),
+    });
+  } catch {}
+}
+
 export default function CompleteProfilePage() {
   const { data: settings } = useGetSettings();
   const { user, refreshUser } = useAuth();
@@ -33,6 +43,7 @@ export default function CompleteProfilePage() {
     if (error) {
       setError("Erro ao salvar dados. Tente novamente.");
     } else {
+      if (user?.email) await saveUserToDb(name, phone, user.email);
       await refreshUser();
       navigate("/agendar");
     }
