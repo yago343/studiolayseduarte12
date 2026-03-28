@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
-import { Paintbrush, MessageSquare, Building2, Globe, ImageIcon, Upload, X, LayoutDashboard, Globe2 } from "lucide-react";
+import { MessageSquare, Building2, Globe, ImageIcon, Upload, X, LayoutDashboard, Globe2 } from "lucide-react";
 
 function LogoUploader({
   label,
@@ -144,14 +144,6 @@ export default function SettingsPage() {
               <label className="text-sm font-medium">Nome do Estúdio</label>
               <Input {...register("studioName")} className="rounded-xl" />
             </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium flex items-center gap-2">Cor Principal (CSS) <Paintbrush className="w-4 h-4" /></label>
-              <div className="flex gap-3">
-                <Input {...register("primaryColor")} className="rounded-xl flex-1 font-mono text-sm" placeholder="ex: hsl(350 45% 65%) ou #E29578" />
-              </div>
-              <p className="text-xs text-muted-foreground">Esta cor define o visual do link de agendamento que você manda para as clientes.</p>
-            </div>
-
             {/* Logo Section */}
             <div className="border-t border-border/50 pt-5 space-y-6">
               <div className="flex items-center gap-2 text-foreground">
