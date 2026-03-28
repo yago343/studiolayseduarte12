@@ -129,14 +129,14 @@ export default function SettingsPage() {
   return (
     <div className="max-w-3xl mx-auto space-y-8">
       <div>
-        <h1 className="text-3xl font-serif font-bold">Configurações</h1>
+        <h1 className="text-3xl font-bold">Configurações</h1>
         <p className="text-muted-foreground mt-1">Personalize a identidade e mensagens do seu estúdio.</p>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <Card className="rounded-3xl shadow-sm border-border overflow-hidden">
           <CardHeader className="bg-primary/5 pb-4 border-b border-border/50">
-            <CardTitle className="font-serif flex items-center gap-2"><Building2 className="w-5 h-5 text-primary" /> Identidade Visual</CardTitle>
+            <CardTitle className="flex items-center gap-2"><Building2 className="w-5 h-5 text-primary" /> Identidade Visual</CardTitle>
             <CardDescription>Nome, cor principal e logos do estúdio.</CardDescription>
           </CardHeader>
           <CardContent className="p-6 space-y-6">
@@ -182,7 +182,7 @@ export default function SettingsPage() {
 
         <Card className="rounded-3xl shadow-sm border-border overflow-hidden">
           <CardHeader className="bg-primary/5 pb-4 border-b border-border/50">
-            <CardTitle className="font-serif flex items-center gap-2"><MessageSquare className="w-5 h-5 text-primary" /> Mensagens</CardTitle>
+            <CardTitle className="flex items-center gap-2"><MessageSquare className="w-5 h-5 text-primary" /> Mensagens</CardTitle>
             <CardDescription>Textos exibidos para as clientes no app público.</CardDescription>
           </CardHeader>
           <CardContent className="p-6 space-y-4">

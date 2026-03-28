@@ -98,7 +98,7 @@ export default function ServicesPage() {
     <div className="space-y-8">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-serif font-bold">Serviços</h1>
+          <h1 className="text-3xl font-bold">Serviços</h1>
           <p className="text-muted-foreground mt-1">Gerencie os procedimentos oferecidos no estúdio.</p>
         </div>
         <Button onClick={openCreate} className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl shadow-lg shadow-primary/20 hover-elevate">
@@ -113,7 +113,7 @@ export default function ServicesPage() {
       ) : services?.length === 0 ? (
         <div className="text-center py-20 bg-card rounded-3xl border border-border/50">
           <Sparkles className="w-16 h-16 mx-auto text-muted-foreground/30 mb-4" />
-          <h3 className="text-xl font-serif font-medium">Nenhum serviço cadastrado</h3>
+          <h3 className="text-xl font-medium">Nenhum serviço cadastrado</h3>
           <p className="text-muted-foreground mt-2 mb-6">Comece adicionando seu primeiro procedimento.</p>
           <Button onClick={openCreate} variant="outline" className="rounded-xl">Adicionar Serviço</Button>
         </div>
@@ -157,7 +157,7 @@ export default function ServicesPage() {
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent className="sm:max-w-[425px] rounded-3xl p-0 overflow-hidden border-none shadow-2xl">
           <div className="bg-primary/10 p-6 pb-8">
-            <DialogTitle className="text-2xl font-serif text-foreground">
+            <DialogTitle className="text-2xl text-foreground">
               {editingId ? "Editar Serviço" : "Novo Serviço"}
             </DialogTitle>
             <p className="text-sm text-muted-foreground mt-1">Preencha os detalhes do procedimento abaixo.</p>

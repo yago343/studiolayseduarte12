@@ -107,7 +107,7 @@ export default function ClientsPage() {
             {client.name.charAt(0)}
           </div>
           <div>
-            <h3 className="text-xl font-bold font-serif">{client.name}</h3>
+            <h3 className="text-xl font-bold">{client.name}</h3>
             <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
               <Phone className="w-3 h-3" /> {client.phone || "Sem telefone"}
             </p>
@@ -180,7 +180,7 @@ export default function ClientsPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-serif font-bold">Clientes</h1>
+          <h1 className="text-3xl font-bold">Clientes</h1>
           <p className="text-muted-foreground mt-1">Lista de clientes e histórico.</p>
         </div>
         <div className="flex items-center gap-3 w-full sm:w-auto">
@@ -281,7 +281,7 @@ export default function ClientsPage() {
       <Dialog open={!!selectedClientId} onOpenChange={() => setSelectedClientId(null)}>
         <DialogContent className="rounded-3xl border-border p-0 overflow-hidden sm:max-w-md max-h-[85vh] overflow-y-auto" aria-describedby="client-details-desc">
           <DialogHeader className="p-4 pb-0 bg-primary/5">
-            <DialogTitle className="font-serif text-xl">Detalhes da Cliente</DialogTitle>
+            <DialogTitle className="text-xl">Detalhes da Cliente</DialogTitle>
           </DialogHeader>
           <p id="client-details-desc" className="sr-only">Informações e histórico da cliente</p>
           {selectedClientId && <ClientDetails id={selectedClientId} />}
@@ -292,7 +292,7 @@ export default function ClientsPage() {
       <Dialog open={newClientOpen} onOpenChange={setNewClientOpen}>
         <DialogContent className="rounded-3xl sm:max-w-md" aria-describedby="new-client-desc">
           <DialogHeader>
-            <DialogTitle className="font-serif text-xl flex items-center gap-2">
+            <DialogTitle className="text-xl flex items-center gap-2">
               <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
                 <Users className="w-4 h-4 text-primary" />
               </div>

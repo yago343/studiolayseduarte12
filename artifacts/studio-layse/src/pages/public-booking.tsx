@@ -114,7 +114,7 @@ export default function PublicBooking() {
               />
             </div>
           )}
-          <h1 className="text-4xl font-serif font-bold text-foreground mb-2">{studioName}</h1>
+          <h1 className="text-4xl font-bold text-foreground mb-2">{studioName}</h1>
           <p className="text-muted-foreground">
             {settings?.bookingMessage || "Agende seu momento de beleza com facilidade."}
           </p>
@@ -131,7 +131,7 @@ export default function PublicBooking() {
           <CardContent className="p-6 sm:p-10 min-h-[400px]">
             {step === 1 && (
               <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <h2 className="text-2xl font-serif font-bold mb-2">Qual procedimento?</h2>
+                <h2 className="text-2xl font-bold mb-2">Qual procedimento?</h2>
                 <p className="text-sm text-muted-foreground mb-6">Selecione um ou mais serviços</p>
                 <div className="space-y-3">
                   {services?.map((s) => {
@@ -209,7 +209,7 @@ export default function PublicBooking() {
                 >
                   ← Voltar
                 </Button>
-                <h2 className="text-2xl font-serif font-bold mb-6 flex items-center gap-2">
+                <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
                   <CalIcon className="text-primary w-6 h-6" /> Escolha o dia
                 </h2>
 
@@ -231,7 +231,7 @@ export default function PublicBooking() {
                         <div className="text-xs font-medium uppercase mb-1 opacity-80">
                           {format(d, "EEE", { locale: ptBR })}
                         </div>
-                        <div className="text-xl font-bold font-serif">{format(d, "dd")}</div>
+                        <div className="text-xl font-bold">{format(d, "dd")}</div>
                         <div className="text-xs opacity-80 mt-1">{format(d, "MMM", { locale: ptBR })}</div>
                       </div>
                     );
@@ -257,7 +257,7 @@ export default function PublicBooking() {
                 >
                   ← Voltar
                 </Button>
-                <h2 className="text-2xl font-serif font-bold mb-6 flex items-center gap-2">
+                <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
                   <Clock className="text-primary w-6 h-6" /> Escolha o horário
                 </h2>
 
@@ -311,7 +311,7 @@ export default function PublicBooking() {
                 >
                   ← Voltar
                 </Button>
-                <h2 className="text-2xl font-serif font-bold mb-6 flex items-center gap-2">
+                <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
                   <User className="text-primary w-6 h-6" /> Seus dados
                 </h2>
 
@@ -441,7 +441,7 @@ export default function PublicBooking() {
                 <div className="w-24 h-24 bg-emerald-100 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6">
                   <CheckCircle2 className="w-12 h-12" />
                 </div>
-                <h2 className="text-3xl font-serif font-bold mb-3 text-foreground">Tudo certo!</h2>
+                <h2 className="text-3xl font-bold mb-3 text-foreground">Tudo certo!</h2>
                 <p className="text-muted-foreground text-lg max-w-sm mx-auto">
                   Seu horário foi reservado com sucesso. Te enviamos os detalhes no WhatsApp.
                 </p>

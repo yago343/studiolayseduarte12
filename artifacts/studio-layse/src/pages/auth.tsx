@@ -133,7 +133,7 @@ export default function AuthPage() {
           />
         </div>
       )}
-      <h1 className="text-4xl font-serif font-bold text-foreground mb-2">{studioName}</h1>
+      <h1 className="text-4xl font-bold text-foreground mb-2">{studioName}</h1>
     </div>
   );
 
@@ -158,7 +158,7 @@ export default function AuthPage() {
                   <Mail className="w-5 h-5" style={{ color: primaryColor }} />
                 </div>
                 <div>
-                  <h2 className="text-lg font-serif font-bold leading-tight">Acesse sua conta</h2>
+                  <h2 className="text-lg font-bold leading-tight">Acesse sua conta</h2>
                   <p className="text-xs text-muted-foreground">Receba um código no seu e-mail para entrar</p>
                 </div>
               </div>
@@ -212,7 +212,7 @@ export default function AuthPage() {
                   <KeyRound className="w-5 h-5" style={{ color: primaryColor }} />
                 </div>
                 <div>
-                  <h2 className="text-lg font-serif font-bold leading-tight">Digite o código</h2>
+                  <h2 className="text-lg font-bold leading-tight">Digite o código</h2>
                   <p className="text-xs text-muted-foreground">Enviamos 6 dígitos para <span className="font-medium text-foreground">{email}</span></p>
                 </div>
               </div>
@@ -257,7 +257,7 @@ export default function AuthPage() {
         {view === "first-access" && (
           <Card className="rounded-[2rem] shadow-xl border-border/50 bg-card/90 backdrop-blur-xl overflow-hidden">
             <CardContent className="p-6 sm:p-8">
-              <h2 className="text-xl font-serif font-bold mb-1">Bem-vinda! 🌸</h2>
+              <h2 className="text-xl font-bold mb-1">Bem-vinda! 🌸</h2>
               <p className="text-sm text-muted-foreground mb-6">
                 É sua primeira vez aqui. Preencha seus dados para completar o cadastro.
               </p>

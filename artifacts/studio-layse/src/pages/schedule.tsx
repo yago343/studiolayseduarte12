@@ -49,7 +49,7 @@ export default function SchedulePage() {
   return (
     <div className="max-w-2xl mx-auto space-y-8 pb-10">
       <div>
-        <h1 className="text-3xl font-serif font-bold">Horários de Funcionamento</h1>
+        <h1 className="text-3xl font-bold">Horários de Funcionamento</h1>
         <p className="text-muted-foreground mt-1">Configure os dias e horários que o estúdio estará aberto para agendamentos online.</p>
       </div>
 
@@ -69,7 +69,7 @@ export default function SchedulePage() {
                   <div className={`w-1 h-8 rounded-full flex-shrink-0 transition-colors ${day.isOpen ? 'bg-primary' : 'bg-muted-foreground/30'}`} />
 
                   {/* Day name */}
-                  <span className={`flex-1 font-bold font-serif text-base ${day.isOpen ? 'text-foreground' : 'text-muted-foreground'}`}>
+                  <span className={`flex-1 font-bold text-base ${day.isOpen ? 'text-foreground' : 'text-muted-foreground'}`}>
                     {day.dayName}
                   </span>
 

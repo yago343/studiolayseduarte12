@@ -59,7 +59,7 @@ export default function UsersPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-serif font-bold text-foreground">Usuários Cadastrados</h1>
+        <h1 className="text-2xl font-bold text-foreground">Usuários Cadastrados</h1>
         <p className="text-muted-foreground text-sm mt-1">
           Controle de todos os e-mails e cadastros realizados no link público
         </p>

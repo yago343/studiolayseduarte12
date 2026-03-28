@@ -67,7 +67,7 @@ export default function FinancesPage() {
     <div className="space-y-8">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-serif font-bold">Financeiro</h1>
+          <h1 className="text-3xl font-bold">Financeiro</h1>
           <p className="text-muted-foreground mt-1">Acompanhe a saúde financeira do seu negócio.</p>
         </div>
         <div className="flex gap-2">
@@ -92,7 +92,7 @@ export default function FinancesPage() {
             <CardContent className="p-6 flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Total Entradas</p>
-                <h3 className="text-2xl font-bold font-serif text-emerald-600 mt-1">{formatCurrency(summary.totalIncome)}</h3>
+                <h3 className="text-2xl font-bold text-emerald-600 mt-1">{formatCurrency(summary.totalIncome)}</h3>
               </div>
               <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center dark:bg-emerald-900/30"><TrendingUp /></div>
             </CardContent>
@@ -101,7 +101,7 @@ export default function FinancesPage() {
             <CardContent className="p-6 flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Total Saídas</p>
-                <h3 className="text-2xl font-bold font-serif text-destructive mt-1">{formatCurrency(summary.totalExpenses)}</h3>
+                <h3 className="text-2xl font-bold text-destructive mt-1">{formatCurrency(summary.totalExpenses)}</h3>
               </div>
               <div className="w-12 h-12 bg-red-100 text-destructive rounded-full flex items-center justify-center dark:bg-red-900/30"><TrendingDown /></div>
             </CardContent>
@@ -110,7 +110,7 @@ export default function FinancesPage() {
             <CardContent className="p-6 flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Lucro Líquido</p>
-                <h3 className="text-3xl font-bold font-serif text-foreground mt-1">{formatCurrency(summary.netProfit)}</h3>
+                <h3 className="text-3xl font-bold text-foreground mt-1">{formatCurrency(summary.netProfit)}</h3>
               </div>
               <div className="w-12 h-12 bg-primary/20 text-primary rounded-full flex items-center justify-center"><Wallet /></div>
             </CardContent>
@@ -128,7 +128,7 @@ export default function FinancesPage() {
         <TabsContent value="overview" className="mt-6 space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <Card className="rounded-3xl shadow-sm border-border">
-              <CardHeader><CardTitle className="font-serif">Receita por Dia</CardTitle></CardHeader>
+              <CardHeader><CardTitle className="">Receita por Dia</CardTitle></CardHeader>
               <CardContent className="h-[300px]">
                 {summary?.dailyRevenue && (
                   <ResponsiveContainer width="100%" height="100%">
@@ -149,7 +149,7 @@ export default function FinancesPage() {
             </Card>
 
             <Card className="rounded-3xl shadow-sm border-border">
-              <CardHeader><CardTitle className="font-serif">Métodos de Pagamento</CardTitle></CardHeader>
+              <CardHeader><CardTitle className="">Métodos de Pagamento</CardTitle></CardHeader>
               <CardContent className="h-[300px] flex items-center justify-center">
                 {summary && (
                   <div className="w-full flex items-center justify-between">
@@ -218,10 +218,10 @@ export default function FinancesPage() {
       </Tabs>
 
       <Dialog open={isIncomeModal} onOpenChange={setIsIncomeModal}>
-        <DialogContent className="rounded-3xl border-border"><DialogHeader><DialogTitle className="font-serif text-xl">Adicionar Receita Manual</DialogTitle></DialogHeader><IncomeForm /></DialogContent>
+        <DialogContent className="rounded-3xl border-border"><DialogHeader><DialogTitle className="text-xl">Adicionar Receita Manual</DialogTitle></DialogHeader><IncomeForm /></DialogContent>
       </Dialog>
       <Dialog open={isExpenseModal} onOpenChange={setIsExpenseModal}>
-        <DialogContent className="rounded-3xl border-border"><DialogHeader><DialogTitle className="font-serif text-xl">Nova Despesa</DialogTitle></DialogHeader><ExpenseForm /></DialogContent>
+        <DialogContent className="rounded-3xl border-border"><DialogHeader><DialogTitle className="text-xl">Nova Despesa</DialogTitle></DialogHeader><ExpenseForm /></DialogContent>
       </Dialog>
     </div>
   );
