@@ -91,6 +91,7 @@ export default function PublicBooking() {
                     >
                       <div>
                         <h3 className="font-bold text-lg">{s.name}</h3>
+                        {s.description && <p className="text-sm text-muted-foreground mt-0.5">{s.description}</p>}
                         <p className="text-sm text-muted-foreground mt-1">{s.durationMinutes} minutos</p>
                       </div>
                       <span className="font-medium text-emerald-700 bg-emerald-100 px-3 py-1 rounded-full">
