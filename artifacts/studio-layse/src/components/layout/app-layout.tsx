@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
+import { useGetSettings } from "@workspace/api-client-react";
 
 const navigation = [
   { name: 'Dashboard',     href: '/dashboard',     icon: LayoutDashboard },
@@ -38,6 +39,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const { data: settings } = useGetSettings();
+  const adminLogo = (settings as any)?.adminLogoUrl || null;
 
   useEffect(() => {
     const isDark = document.documentElement.classList.contains("dark") || 
@@ -73,10 +76,16 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       <aside className="hidden md:flex flex-col fixed top-0 left-0 bottom-0 w-60 sidebar-gradient z-30">
         {/* Logo */}
         <div className="flex items-center gap-2.5 px-5 h-16 border-b border-white/10 shrink-0">
-          <div className="w-8 h-8 rounded-xl brand-gradient flex items-center justify-center shadow-sm shrink-0">
-            <Scissors className="w-4 h-4 text-white" />
-          </div>
-          <span className="font-bold text-sm text-white">Studio Layse</span>
+          {adminLogo ? (
+            <img src={adminLogo} alt="Logo" className="h-9 max-w-[160px] object-contain" />
+          ) : (
+            <>
+              <div className="w-8 h-8 rounded-xl brand-gradient flex items-center justify-center shadow-sm shrink-0">
+                <Scissors className="w-4 h-4 text-white" />
+              </div>
+              <span className="font-bold text-sm text-white">Studio Layse</span>
+            </>
+          )}
         </div>
 
         {/* Nav links */}
@@ -120,10 +129,16 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       ══════════════════════════════════════ */}
       <header className="md:hidden fixed top-0 left-0 right-0 flex items-center justify-between px-4 h-14 bg-card/95 backdrop-blur-md border-b border-border z-30 shadow-sm">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl brand-gradient flex items-center justify-center shadow-sm shrink-0">
-            <Scissors className="w-4 h-4 text-white" />
-          </div>
-          <span className="font-bold text-sm text-foreground">Studio Layse</span>
+          {adminLogo ? (
+            <img src={adminLogo} alt="Logo" className="h-8 max-w-[140px] object-contain" />
+          ) : (
+            <>
+              <div className="w-8 h-8 rounded-xl brand-gradient flex items-center justify-center shadow-sm shrink-0">
+                <Scissors className="w-4 h-4 text-white" />
+              </div>
+              <span className="font-bold text-sm text-foreground">Studio Layse</span>
+            </>
+          )}
         </div>
 
         <div className="flex items-center gap-1">
@@ -164,10 +179,16 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             >
               <div className="flex items-center justify-between px-4 h-14 border-b border-border">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-7 h-7 rounded-lg brand-gradient flex items-center justify-center">
-                    <Scissors className="w-3.5 h-3.5 text-white" />
-                  </div>
-                  <span className="font-bold text-sm text-foreground">Studio Layse</span>
+                  {adminLogo ? (
+                    <img src={adminLogo} alt="Logo" className="h-8 max-w-[140px] object-contain" />
+                  ) : (
+                    <>
+                      <div className="w-7 h-7 rounded-lg brand-gradient flex items-center justify-center">
+                        <Scissors className="w-3.5 h-3.5 text-white" />
+                      </div>
+                      <span className="font-bold text-sm text-foreground">Studio Layse</span>
+                    </>
+                  )}
                 </div>
                 <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground" onClick={() => setMenuOpen(false)}>
                   <X className="w-4 h-4" />

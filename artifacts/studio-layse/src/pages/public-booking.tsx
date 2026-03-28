@@ -84,6 +84,7 @@ export default function PublicBooking() {
 
   const studioName = settings?.studioName || "Studio Layse";
   const primaryColor = settings?.primaryColor || "hsl(350 45% 65%)";
+  const publicLogo = (settings as any)?.publicLogoUrl || null;
 
   return (
     <div className="min-h-screen bg-background font-sans relative pb-20">
@@ -96,9 +97,15 @@ export default function PublicBooking() {
 
       <div className="relative z-10 max-w-2xl mx-auto pt-16 px-4">
         <div className="text-center mb-10">
-          <div className="w-20 h-20 mx-auto bg-white rounded-full shadow-xl flex items-center justify-center p-1 mb-4 overflow-hidden">
-            <img src={`${import.meta.env.BASE_URL}images/logo-placeholder.png`} alt="Logo" className="w-full h-full object-cover scale-125 object-top" />
-          </div>
+          {publicLogo ? (
+            <div className="w-28 h-28 mx-auto bg-white rounded-full shadow-xl flex items-center justify-center p-2 mb-4 overflow-hidden">
+              <img src={publicLogo} alt="Logo" className="w-full h-full object-contain" />
+            </div>
+          ) : (
+            <div className="w-20 h-20 mx-auto bg-white rounded-full shadow-xl flex items-center justify-center p-1 mb-4 overflow-hidden">
+              <img src={`${import.meta.env.BASE_URL}images/logo-placeholder.png`} alt="Logo" className="w-full h-full object-cover scale-125 object-top" />
+            </div>
+          )}
           <h1 className="text-4xl font-serif font-bold text-foreground mb-2">{studioName}</h1>
           <p className="text-muted-foreground">{settings?.bookingMessage || "Agende seu momento de beleza com facilidade."}</p>
         </div>

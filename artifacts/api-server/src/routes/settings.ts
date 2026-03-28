@@ -36,20 +36,26 @@ async function ensureDefaults() {
 }
 
 // Settings
+function serializeSettings(s: any) {
+  return {
+    studioName: s.studioName,
+    primaryColor: s.primaryColor,
+    welcomeMessage: s.welcomeMessage,
+    bookingMessage: s.bookingMessage,
+    adminLogoUrl: s.adminLogoUrl || null,
+    publicLogoUrl: s.publicLogoUrl || null,
+  };
+}
+
 router.get("/settings", async (req, res) => {
   await ensureDefaults();
   const [settings] = await db.select().from(settingsTable).limit(1);
-  res.json({
-    studioName: settings.studioName,
-    primaryColor: settings.primaryColor,
-    welcomeMessage: settings.welcomeMessage,
-    bookingMessage: settings.bookingMessage,
-  });
+  res.json(serializeSettings(settings));
 });
 
 router.put("/settings", async (req, res) => {
   await ensureDefaults();
-  const { studioName, primaryColor, welcomeMessage, bookingMessage } = req.body;
+  const { studioName, primaryColor, welcomeMessage, bookingMessage, adminLogoUrl, publicLogoUrl } = req.body;
   const existing = await db.select().from(settingsTable).limit(1);
   
   let settings;
@@ -59,16 +65,13 @@ router.put("/settings", async (req, res) => {
       primaryColor: primaryColor || existing[0].primaryColor,
       welcomeMessage: welcomeMessage !== undefined ? welcomeMessage : existing[0].welcomeMessage,
       bookingMessage: bookingMessage !== undefined ? bookingMessage : existing[0].bookingMessage,
+      adminLogoUrl: adminLogoUrl !== undefined ? adminLogoUrl : existing[0].adminLogoUrl,
+      publicLogoUrl: publicLogoUrl !== undefined ? publicLogoUrl : existing[0].publicLogoUrl,
     }).where(eq(settingsTable.id, existing[0].id)).returning();
   } else {
-    [settings] = await db.insert(settingsTable).values({ studioName, primaryColor, welcomeMessage, bookingMessage }).returning();
+    [settings] = await db.insert(settingsTable).values({ studioName, primaryColor, welcomeMessage, bookingMessage, adminLogoUrl, publicLogoUrl }).returning();
   }
-  res.json({
-    studioName: settings.studioName,
-    primaryColor: settings.primaryColor,
-    welcomeMessage: settings.welcomeMessage,
-    bookingMessage: settings.bookingMessage,
-  });
+  res.json(serializeSettings(settings));
 });
 
 // Working hours

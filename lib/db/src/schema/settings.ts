@@ -8,6 +8,8 @@ export const settingsTable = pgTable("settings", {
   primaryColor: text("primary_color").notNull().default("#e91e8c"),
   welcomeMessage: text("welcome_message"),
   bookingMessage: text("booking_message"),
+  adminLogoUrl: text("admin_logo_url"),
+  publicLogoUrl: text("public_logo_url"),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
