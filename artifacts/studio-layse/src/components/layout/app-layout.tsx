@@ -41,6 +41,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const { data: settings } = useGetSettings();
   const adminLogo = (settings as any)?.adminLogoUrl || null;
+  const studioName = (settings as any)?.studioName || "Studio Layse";
 
   useEffect(() => {
     const isDark = document.documentElement.classList.contains("dark") || 
@@ -77,13 +78,18 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         {/* Logo */}
         <div className="flex items-center gap-2.5 px-5 h-16 border-b border-white/10 shrink-0">
           {adminLogo ? (
-            <img src={adminLogo} alt="Logo" className="h-9 max-w-[160px] object-contain" />
+            <>
+              <div className="w-9 h-9 rounded-full overflow-hidden shrink-0 border-2 border-white/20 shadow-sm">
+                <img src={adminLogo} alt="Logo" className="w-full h-full object-cover" />
+              </div>
+              <span className="font-bold text-sm text-white truncate">{studioName}</span>
+            </>
           ) : (
             <>
               <div className="w-8 h-8 rounded-xl brand-gradient flex items-center justify-center shadow-sm shrink-0">
                 <Scissors className="w-4 h-4 text-white" />
               </div>
-              <span className="font-bold text-sm text-white">Studio Layse</span>
+              <span className="font-bold text-sm text-white">{studioName}</span>
             </>
           )}
         </div>
@@ -130,13 +136,18 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       <header className="md:hidden fixed top-0 left-0 right-0 flex items-center justify-between px-4 h-14 bg-card/95 backdrop-blur-md border-b border-border z-30 shadow-sm">
         <div className="flex items-center gap-2.5">
           {adminLogo ? (
-            <img src={adminLogo} alt="Logo" className="h-8 max-w-[140px] object-contain" />
+            <>
+              <div className="w-8 h-8 rounded-full overflow-hidden shrink-0 border-2 border-border shadow-sm">
+                <img src={adminLogo} alt="Logo" className="w-full h-full object-cover" />
+              </div>
+              <span className="font-bold text-sm text-foreground truncate max-w-[130px]">{studioName}</span>
+            </>
           ) : (
             <>
               <div className="w-8 h-8 rounded-xl brand-gradient flex items-center justify-center shadow-sm shrink-0">
                 <Scissors className="w-4 h-4 text-white" />
               </div>
-              <span className="font-bold text-sm text-foreground">Studio Layse</span>
+              <span className="font-bold text-sm text-foreground">{studioName}</span>
             </>
           )}
         </div>
@@ -180,13 +191,18 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               <div className="flex items-center justify-between px-4 h-14 border-b border-border">
                 <div className="flex items-center gap-2.5">
                   {adminLogo ? (
-                    <img src={adminLogo} alt="Logo" className="h-8 max-w-[140px] object-contain" />
+                    <>
+                      <div className="w-8 h-8 rounded-full overflow-hidden shrink-0 border-2 border-border shadow-sm">
+                        <img src={adminLogo} alt="Logo" className="w-full h-full object-cover" />
+                      </div>
+                      <span className="font-bold text-sm text-foreground truncate max-w-[130px]">{studioName}</span>
+                    </>
                   ) : (
                     <>
                       <div className="w-7 h-7 rounded-lg brand-gradient flex items-center justify-center">
                         <Scissors className="w-3.5 h-3.5 text-white" />
                       </div>
-                      <span className="font-bold text-sm text-foreground">Studio Layse</span>
+                      <span className="font-bold text-sm text-foreground">{studioName}</span>
                     </>
                   )}
                 </div>
