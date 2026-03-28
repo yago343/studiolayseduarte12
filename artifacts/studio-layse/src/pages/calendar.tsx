@@ -45,13 +45,12 @@ import {
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 /* ─── Constants ─────────────────────────────────────────────── */
 const DAY_START = 8;
 const DAY_END = 20;
 const TOTAL_HOURS = DAY_END - DAY_START;
-const HOUR_PX = 72;
-const MIN_PX = HOUR_PX / 60;
 const HOURS = Array.from({ length: TOTAL_HOURS }, (_, i) => DAY_START + i);
 
 const APT_COLORS = [
@@ -225,6 +224,9 @@ export default function CalendarPage() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<"pix" | "cash" | "card">("pix");
   const gridRef = useRef<HTMLDivElement>(null);
+  const isMobile = useIsMobile();
+  const HOUR_PX = isMobile ? 48 : 72;
+  const MIN_PX = HOUR_PX / 60;
 
   const todayStr = format(new Date(), "yyyy-MM-dd");
   const selectedStr = format(currentDate, "yyyy-MM-dd");
