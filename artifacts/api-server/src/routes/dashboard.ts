@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { db, appointmentsTable, incomesTable } from "@workspace/db";
+import { db, appointmentsTable, incomesTable, expensesTable } from "@workspace/db";
 import { gte, lte, and, eq } from "drizzle-orm";
 
 const router = Router();
@@ -19,7 +19,7 @@ router.get("/", async (req, res) => {
   sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 5);
   sixMonthsAgo.setDate(1);
 
-  const [todayIncomes, weekIncomes, monthIncomes, allIncomes, todayAppts, weekAppts, monthAppts, upcomingAppts] = await Promise.all([
+  const [todayIncomes, weekIncomes, monthIncomes, allIncomes, todayAppts, weekAppts, monthAppts, upcomingAppts, monthExpenses] = await Promise.all([
     db.select().from(incomesTable).where(eq(incomesTable.date, today)),
     db.select().from(incomesTable).where(and(gte(incomesTable.date, weekStartStr), lte(incomesTable.date, today))),
     db.select().from(incomesTable).where(and(gte(incomesTable.date, monthStartStr), lte(incomesTable.date, today))),
@@ -28,11 +28,15 @@ router.get("/", async (req, res) => {
     db.select().from(appointmentsTable).where(and(gte(appointmentsTable.date, weekStartStr), lte(appointmentsTable.date, today))),
     db.select().from(appointmentsTable).where(and(gte(appointmentsTable.date, monthStartStr), lte(appointmentsTable.date, today))),
     db.select().from(appointmentsTable).where(and(gte(appointmentsTable.date, today), eq(appointmentsTable.status, "confirmed"))).limit(10),
+    db.select().from(expensesTable).where(and(gte(expensesTable.date, monthStartStr), lte(expensesTable.date, today))),
   ]);
 
-  const todayRevenue = todayIncomes.reduce((s, i) => s + parseFloat(i.amount), 0);
-  const weekRevenue = weekIncomes.reduce((s, i) => s + parseFloat(i.amount), 0);
-  const monthRevenue = monthIncomes.reduce((s, i) => s + parseFloat(i.amount), 0);
+  const paidOnly = (arr: any[]) => arr.filter(i => (i.paymentStatus ?? "paid") === "paid");
+  const todayRevenue = paidOnly(todayIncomes).reduce((s, i) => s + parseFloat(i.amount), 0);
+  const weekRevenue = paidOnly(weekIncomes).reduce((s, i) => s + parseFloat(i.amount), 0);
+  const monthRevenue = paidOnly(monthIncomes).reduce((s, i) => s + parseFloat(i.amount), 0);
+  const monthPending = monthIncomes.filter(i => i.paymentStatus === "pending").reduce((s, i) => s + parseFloat(i.amount), 0);
+  const monthExpensesTotal = monthExpenses.reduce((s, e) => s + parseFloat(e.amount), 0);
 
   const completedMonthAppts = monthAppts.filter(a => a.status === "completed");
   const averageTicket = completedMonthAppts.length > 0 ? monthRevenue / completedMonthAppts.length : 0;
@@ -100,6 +104,9 @@ router.get("/", async (req, res) => {
     todayRevenue,
     weekRevenue,
     monthRevenue,
+    monthPending,
+    monthExpenses: monthExpensesTotal,
+    netProfit: monthRevenue - monthExpensesTotal,
     todayAppointments: todayAppts.filter(a => a.status !== "cancelled").length,
     weekAppointments: weekAppts.filter(a => a.status !== "cancelled").length,
     monthAppointments: monthAppts.filter(a => a.status !== "cancelled").length,

@@ -216,6 +216,7 @@ export default function CalendarPage() {
   const [selectedApt, setSelectedApt] = useState<any>(null);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<"pix" | "cash" | "card">("pix");
+  const [isPendingPayment, setIsPendingPayment] = useState(false);
   const gridRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
   const HOUR_PX = isMobile ? 52 : 72;
@@ -530,24 +531,55 @@ export default function CalendarPage() {
                 {selectedApt.status === "confirmed" && (
                   <>
                     <p className="text-xs font-bold text-muted-foreground mb-2 uppercase tracking-wider">Pagamento</p>
-                    <div className="grid grid-cols-3 gap-2 mb-3">
-                      {(["pix", "cash", "card"] as const).map(m => (
-                        <button key={m} onClick={() => setPaymentMethod(m)}
-                          className={`py-2.5 rounded-xl text-xs font-medium border transition-all ${
-                            paymentMethod === m
-                              ? "bg-primary text-white border-primary shadow-md shadow-primary/20"
-                              : "border-border hover:bg-muted"
-                          }`}>
-                          {m === "pix" ? "💸 Pix" : m === "cash" ? "💵 Dinheiro" : "💳 Cartão"}
-                        </button>
-                      ))}
+
+                    {/* Paid / Pending toggle */}
+                    <div className="grid grid-cols-2 gap-2 mb-3">
+                      <button
+                        onClick={() => setIsPendingPayment(false)}
+                        className={`py-2 rounded-xl text-xs font-semibold border transition-all ${
+                          !isPendingPayment ? "bg-emerald-500 text-white border-emerald-500" : "border-border hover:bg-muted"
+                        }`}
+                      >
+                        ✅ Pago
+                      </button>
+                      <button
+                        onClick={() => setIsPendingPayment(true)}
+                        className={`py-2 rounded-xl text-xs font-semibold border transition-all ${
+                          isPendingPayment ? "bg-amber-400 text-white border-amber-400" : "border-border hover:bg-muted"
+                        }`}
+                      >
+                        ⏳ Pendente
+                      </button>
                     </div>
+
+                    {/* Payment method — only when paid */}
+                    {!isPendingPayment && (
+                      <div className="grid grid-cols-3 gap-2 mb-3">
+                        {(["pix", "cash", "card"] as const).map(m => (
+                          <button key={m} onClick={() => setPaymentMethod(m)}
+                            className={`py-2.5 rounded-xl text-xs font-medium border transition-all ${
+                              paymentMethod === m
+                                ? "bg-primary text-white border-primary shadow-md shadow-primary/20"
+                                : "border-border hover:bg-muted"
+                            }`}>
+                            {m === "pix" ? "💸 Pix" : m === "cash" ? "💵 Dinheiro" : "💳 Cartão"}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
                     <Button
-                      className="w-full rounded-xl h-11 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold"
-                      onClick={() => statusMut.mutate({ id: selectedApt.id, data: { status: "completed", paymentMethod } })}
+                      className={`w-full rounded-xl h-11 font-semibold text-white ${isPendingPayment ? "bg-amber-400 hover:bg-amber-500" : "bg-emerald-500 hover:bg-emerald-600"}`}
+                      onClick={() => statusMut.mutate({
+                        id: selectedApt.id,
+                        data: isPendingPayment
+                          ? { status: "completed", paymentStatus: "pending" }
+                          : { status: "completed", paymentMethod }
+                      })}
                       disabled={statusMut.isPending}
                     >
-                      <CheckCircle2 className="w-4 h-4 mr-2" /> Marcar como Concluído
+                      <CheckCircle2 className="w-4 h-4 mr-2" />
+                      {isPendingPayment ? "Concluir com Pagamento Pendente" : "Marcar como Concluído"}
                     </Button>
                     <Button variant="outline" className="w-full rounded-xl h-10 text-red-500 border-red-200 hover:bg-red-50"
                       onClick={() => statusMut.mutate({ id: selectedApt.id, data: { status: "cancelled" } })}

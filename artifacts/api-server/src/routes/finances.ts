@@ -1,11 +1,16 @@
 import { Router } from "express";
-import { db, incomesTable, expensesTable, appointmentsTable } from "@workspace/db";
-import { eq, gte, lte, and, sql } from "drizzle-orm";
+import { db, incomesTable, expensesTable } from "@workspace/db";
+import { eq, gte, lte, and } from "drizzle-orm";
 
 const router = Router();
 
 function formatIncome(i: any) {
-  return { ...i, amount: parseFloat(i.amount), createdAt: i.createdAt.toISOString() };
+  return {
+    ...i,
+    amount: parseFloat(i.amount),
+    paymentStatus: i.paymentStatus ?? "paid",
+    createdAt: i.createdAt.toISOString(),
+  };
 }
 function formatExpense(e: any) {
   return { ...e, amount: parseFloat(e.amount), createdAt: e.createdAt.toISOString() };
@@ -17,7 +22,7 @@ router.get("/incomes", async (req, res) => {
   let conditions: any[] = [];
   if (startDate) conditions.push(gte(incomesTable.date, startDate));
   if (endDate) conditions.push(lte(incomesTable.date, endDate));
-  
+
   const incomes = conditions.length > 0
     ? await db.select().from(incomesTable).where(and(...conditions)).orderBy(incomesTable.date)
     : await db.select().from(incomesTable).orderBy(incomesTable.date);
@@ -25,16 +30,29 @@ router.get("/incomes", async (req, res) => {
 });
 
 router.post("/incomes", async (req, res) => {
-  const { appointmentId, serviceName, amount, paymentMethod, date, clientName } = req.body;
+  const { appointmentId, serviceName, amount, paymentMethod, paymentStatus, date, clientName } = req.body;
   const [income] = await db.insert(incomesTable).values({
     appointmentId: appointmentId || null,
     serviceName,
     amount: amount.toString(),
-    paymentMethod,
+    paymentMethod: paymentMethod || null,
+    paymentStatus: paymentStatus || "paid",
     date,
     clientName: clientName || null,
   }).returning();
   res.status(201).json(formatIncome(income));
+});
+
+// Mark income as paid (resolve pending)
+router.patch("/incomes/:id", async (req, res) => {
+  const id = parseInt(req.params.id);
+  const { paymentMethod, paymentStatus } = req.body;
+  const [income] = await db.update(incomesTable)
+    .set({ paymentMethod: paymentMethod || null, paymentStatus: paymentStatus || "paid" })
+    .where(eq(incomesTable.id, id))
+    .returning();
+  if (!income) return res.status(404).json({ error: "Income not found" });
+  res.json(formatIncome(income));
 });
 
 router.delete("/incomes/:id", async (req, res) => {
@@ -49,7 +67,7 @@ router.get("/expenses", async (req, res) => {
   let conditions: any[] = [];
   if (startDate) conditions.push(gte(expensesTable.date, startDate));
   if (endDate) conditions.push(lte(expensesTable.date, endDate));
-  
+
   const expenses = conditions.length > 0
     ? await db.select().from(expensesTable).where(and(...conditions)).orderBy(expensesTable.date)
     : await db.select().from(expensesTable).orderBy(expensesTable.date);
@@ -78,7 +96,7 @@ router.get("/summary", async (req, res) => {
   const { startDate, endDate } = req.query as Record<string, string>;
   let incomeConditions: any[] = [];
   let expenseConditions: any[] = [];
-  
+
   if (startDate) {
     incomeConditions.push(gte(incomesTable.date, startDate));
     expenseConditions.push(gte(expensesTable.date, startDate));
@@ -87,36 +105,41 @@ router.get("/summary", async (req, res) => {
     incomeConditions.push(lte(incomesTable.date, endDate));
     expenseConditions.push(lte(expensesTable.date, endDate));
   }
-  
+
   const incomes = incomeConditions.length > 0
     ? await db.select().from(incomesTable).where(and(...incomeConditions))
     : await db.select().from(incomesTable);
-  
+
   const expenses = expenseConditions.length > 0
     ? await db.select().from(expensesTable).where(and(...expenseConditions))
     : await db.select().from(expensesTable);
-  
-  const totalIncome = incomes.reduce((s, i) => s + parseFloat(i.amount), 0);
+
+  const paidIncomes = incomes.filter(i => (i.paymentStatus ?? "paid") === "paid");
+  const pendingIncomes = incomes.filter(i => i.paymentStatus === "pending");
+
+  const totalIncome = paidIncomes.reduce((s, i) => s + parseFloat(i.amount), 0);
+  const totalPending = pendingIncomes.reduce((s, i) => s + parseFloat(i.amount), 0);
   const totalExpenses = expenses.reduce((s, e) => s + parseFloat(e.amount), 0);
-  
+
   const incomeByPaymentMethod = { pix: 0, cash: 0, card: 0 };
-  incomes.forEach(i => {
+  paidIncomes.forEach(i => {
     const method = i.paymentMethod as "pix" | "cash" | "card";
-    if (method in incomeByPaymentMethod) incomeByPaymentMethod[method] += parseFloat(i.amount);
+    if (method && method in incomeByPaymentMethod) incomeByPaymentMethod[method] += parseFloat(i.amount);
   });
-  
+
   const expensesByCategory: Record<string, number> = {};
   expenses.forEach(e => {
     expensesByCategory[e.category] = (expensesByCategory[e.category] || 0) + parseFloat(e.amount);
   });
-  
+
   const dailyRevenue: Record<string, number> = {};
-  incomes.forEach(i => {
+  paidIncomes.forEach(i => {
     dailyRevenue[i.date] = (dailyRevenue[i.date] || 0) + parseFloat(i.amount);
   });
-  
+
   res.json({
     totalIncome,
+    totalPending,
     totalExpenses,
     netProfit: totalIncome - totalExpenses,
     incomeByPaymentMethod,

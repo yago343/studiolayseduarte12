@@ -101,20 +101,31 @@ export default function Dashboard() {
           accent="border-l-blue-500"
         />
         <MetricCard
-          label="Faturamento mensal"
-          value={formatCurrency(data.monthRevenue)}
+          label="Despesas do mês"
+          value={formatCurrency((data as any).monthExpenses ?? 0)}
+          icon={<TrendingUp className="w-4 h-4 rotate-180" />}
+          iconClass="bg-red-100 text-red-500 dark:bg-red-900/40 dark:text-red-400"
+          accent="border-l-red-400"
+        />
+        <MetricCard
+          label="Lucro líquido (mês)"
+          value={formatCurrency((data as any).netProfit ?? 0)}
           icon={<BarChart2 className="w-4 h-4" />}
           iconClass="bg-violet-100 text-violet-600 dark:bg-violet-900/40 dark:text-violet-400"
           accent="border-l-violet-500"
         />
-        <MetricCard
-          label="Ticket médio"
-          value={formatCurrency(data.averageTicket)}
-          icon={<Users className="w-4 h-4" />}
-          iconClass="bg-amber-100 text-amber-600 dark:bg-amber-900/40 dark:text-amber-400"
-          accent="border-l-amber-500"
-        />
       </div>
+
+      {/* Pending payments alert */}
+      {((data as any).monthPending ?? 0) > 0 && (
+        <div className="flex items-center gap-3 bg-amber-50 border border-amber-200 dark:bg-amber-900/10 dark:border-amber-700/30 rounded-2xl px-4 py-3 text-sm">
+          <span className="text-amber-500 text-base">⏳</span>
+          <span className="text-muted-foreground">
+            <span className="font-semibold text-amber-600">{formatCurrency((data as any).monthPending)}</span> em pagamentos pendentes este mês.{" "}
+            <a href="/financeiro" className="text-primary font-semibold underline underline-offset-2">Ver no Financeiro</a>
+          </span>
+        </div>
+      )}
 
       {/* Summary banner */}
       <div className="flex items-center gap-3 bg-primary/5 border border-primary/10 rounded-2xl px-4 py-3 text-sm">

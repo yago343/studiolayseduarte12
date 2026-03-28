@@ -108,27 +108,29 @@ router.put("/:id", async (req, res) => {
 
 router.patch("/:id/status", async (req, res) => {
   const id = parseInt(req.params.id);
-  const { status, paymentMethod } = req.body;
-  
+  const { status, paymentMethod, paymentStatus } = req.body;
+
   const [appt] = await db.update(appointmentsTable).set({ status, paymentMethod: paymentMethod || null })
     .where(eq(appointmentsTable.id, id)).returning();
   if (!appt) return res.status(404).json({ error: "Appointment not found" });
-  
-  // Auto-create income record when completing
-  if (status === "completed" && paymentMethod) {
+
+  // Auto-create income record when completing (paid or pending)
+  if (status === "completed") {
     const existingIncome = await db.select().from(incomesTable).where(eq(incomesTable.appointmentId, id));
     if (existingIncome.length === 0) {
+      const isPending = paymentStatus === "pending" || (!paymentMethod);
       await db.insert(incomesTable).values({
         appointmentId: id,
         serviceName: appt.serviceName,
         amount: appt.servicePrice,
-        paymentMethod,
+        paymentMethod: isPending ? null : paymentMethod,
+        paymentStatus: isPending ? "pending" : "paid",
         date: appt.date,
         clientName: appt.clientName,
       });
     }
   }
-  
+
   res.json(formatAppt(appt));
 });
 
