@@ -121,15 +121,15 @@ export default function AuthPage() {
   const logoBlock = (
     <div className="text-center mb-10">
       {publicLogo ? (
-        <div className="w-28 h-28 mx-auto bg-white rounded-full shadow-xl flex items-center justify-center p-2 mb-4 overflow-hidden">
-          <img src={publicLogo} alt="Logo" className="w-full h-full object-contain" />
+        <div className="w-24 h-24 mx-auto bg-white rounded-full shadow-xl mb-4 overflow-hidden">
+          <img src={publicLogo} alt="Logo" className="w-full h-full object-cover" />
         </div>
       ) : (
-        <div className="w-20 h-20 mx-auto bg-white rounded-full shadow-xl flex items-center justify-center p-1 mb-4 overflow-hidden">
+        <div className="w-24 h-24 mx-auto bg-white rounded-full shadow-xl mb-4 overflow-hidden">
           <img
             src={`${import.meta.env.BASE_URL}images/logo-placeholder.png`}
             alt="Logo"
-            className="w-full h-full object-cover scale-125 object-top"
+            className="w-full h-full object-cover"
           />
         </div>
       )}
