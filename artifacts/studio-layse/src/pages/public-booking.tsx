@@ -3,7 +3,7 @@ import { useGetSettings, useListServices, useGetAvailability, usePublicBook } fr
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Sparkles, Calendar as CalIcon, Clock, User, CheckCircle2 } from "lucide-react";
+import { Calendar as CalIcon, Clock, User, CheckCircle2 } from "lucide-react";
 import { format, addDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -79,8 +79,8 @@ export default function PublicBooking() {
           <CardContent className="p-6 sm:p-10 min-h-[400px]">
             {step === 1 && (
               <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <h2 className="text-2xl font-serif font-bold mb-6 flex items-center gap-2">
-                  <Sparkles className="text-primary w-6 h-6" /> Qual procedimento?
+                <h2 className="text-2xl font-serif font-bold mb-6">
+                  Qual procedimento?
                 </h2>
                 <div className="space-y-3">
                   {services?.map(s => (
