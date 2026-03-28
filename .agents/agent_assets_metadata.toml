@@ -12,3 +12,9 @@ id = "w-zPNLu2n3zgC7QSHrBww"
 uri = "file://studio-layse-duarte.tar.gz"
 type = "unspecified"
 title = "Studio Layse Duarte — Código Fonte"
+
+[[outputs]]
+id = "JJoyQjtnbedEcUyF31RVA"
+uri = "file://studio-layse-vercel.tar.gz"
+type = "unspecified"
+title = "Studio Layse Duarte — Pronto para Vercel"
