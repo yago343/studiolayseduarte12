@@ -48,11 +48,14 @@ router.get("/", async (req, res) => {
       .where(eq(appointmentsTable.clientId, client.id))
       .orderBy(desc(appointmentsTable.date));
     const freq = calcFrequency(appts);
+    const lastApt = appts[0] ?? null;
     return {
       ...client,
       createdAt: client.createdAt.toISOString(),
-      totalAppointments: appts.filter(a => a.status !== "cancelled").length,
-      lastAppointment: appts[0] ? toDateStr(appts[0].date) : null,
+      totalAppointments: appts.filter(a => a.status === "completed").length,
+      lastAppointment: lastApt ? toDateStr(lastApt.date) : null,
+      lastAppointmentStatus: lastApt ? lastApt.status : null,
+      lastAppointmentService: lastApt ? lastApt.serviceName : null,
       frequencyLabel: freq.label,
       frequencyPercent: freq.percent,
       avgIntervalDays: freq.avgIntervalDays,

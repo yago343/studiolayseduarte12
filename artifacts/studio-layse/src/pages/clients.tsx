@@ -248,19 +248,26 @@ export default function ClientsPage() {
                       )}
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-sm font-medium text-foreground">{client.totalAppointments} visitas</p>
-                    {client.lastAppointment && (
-                      <p className="text-xs text-muted-foreground mt-0.5">
-                        Última: {format(new Date((client.lastAppointment as string) + "T12:00:00"), 'dd/MM/yy')}
-                      </p>
+                  <div className="text-right flex flex-col items-end gap-1">
+                    {c.lastAppointmentStatus ? (
+                      <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${
+                        c.lastAppointmentStatus === "completed"  ? "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300" :
+                        c.lastAppointmentStatus === "confirmed"  ? "bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300" :
+                        c.lastAppointmentStatus === "cancelled"  ? "bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-300" :
+                        "bg-muted text-muted-foreground"
+                      }`}>
+                        {c.lastAppointmentStatus === "completed" ? "✅ Concluído" :
+                         c.lastAppointmentStatus === "confirmed"  ? "📅 Confirmado" :
+                         c.lastAppointmentStatus === "cancelled"  ? "❌ Cancelado"  : c.lastAppointmentStatus}
+                      </span>
+                    ) : null}
+                    {client.totalAppointments > 0 && (
+                      <p className="text-xs text-muted-foreground">{client.totalAppointments} {client.totalAppointments === 1 ? "visita" : "visitas"}</p>
                     )}
-                    {c.frequencyLabel && (
-                      <p className={`text-[11px] font-semibold mt-0.5 ${
-                        c.frequencyLabel === "Alta" ? "text-emerald-600" :
-                        c.frequencyLabel === "Média" ? "text-amber-600" :
-                        c.frequencyLabel === "Baixa" ? "text-red-500" : "text-muted-foreground"
-                      }`}>{c.frequencyPercent}%</p>
+                    {client.lastAppointment && (
+                      <p className="text-xs text-muted-foreground">
+                        {format(new Date((client.lastAppointment as string) + "T12:00:00"), 'dd/MM/yy')}
+                      </p>
                     )}
                   </div>
                 </div>
