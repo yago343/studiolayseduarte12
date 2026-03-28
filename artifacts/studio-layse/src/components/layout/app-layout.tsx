@@ -110,7 +110,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         </div>
 
         {/* Nav links */}
-        <nav className="flex-1 p-3 flex flex-col gap-1 overflow-y-auto">
+        <nav className="flex-1 px-3 pt-4 pb-3 flex flex-col gap-1.5 overflow-y-auto">
           {navigation.map((item) => {
             const active = isActive(item.href);
             return (
