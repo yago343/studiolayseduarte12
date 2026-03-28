@@ -270,7 +270,8 @@ router.post("/public/book", async (req, res) => {
     notes: notes || null,
   }).returning();
   
-  res.status(201).json({ ...appt, servicePrice: parseFloat(appt.servicePrice), createdAt: appt.createdAt.toISOString() });
+  const dateStr = typeof appt.date === "string" ? appt.date.slice(0, 10) : appt.date instanceof Date ? appt.date.toISOString().slice(0, 10) : String(appt.date).slice(0, 10);
+  res.status(201).json({ ...appt, date: dateStr, servicePrice: parseFloat(appt.servicePrice), createdAt: appt.createdAt.toISOString() });
 });
 
 export default router;

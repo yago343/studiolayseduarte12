@@ -1,4 +1,5 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
+import { useSearch } from "wouter";
 import {
   useListAppointments,
   useListServices,
@@ -209,7 +210,17 @@ function MiniCalendar({
 
 /* ─── Main Component ─────────────────────────────────────────── */
 export default function CalendarPage() {
-  const [currentDate, setCurrentDate] = useState(new Date());
+  const search = useSearch();
+  const initialDate = useMemo(() => {
+    const params = new URLSearchParams(search);
+    const d = params.get("date");
+    if (d) {
+      const [y, m, day] = d.split("-").map(Number);
+      return new Date(y, m - 1, day);
+    }
+    return new Date();
+  }, []);
+  const [currentDate, setCurrentDate] = useState(initialDate);
   const [selectedApt, setSelectedApt] = useState<any>(null);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<"pix" | "cash" | "card">("pix");

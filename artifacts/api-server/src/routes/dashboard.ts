@@ -88,6 +88,7 @@ router.get("/", async (req, res) => {
     averageTicket,
     upcomingAppointments: upcomingAppts.map(a => ({
       ...a,
+      date: typeof a.date === "string" ? a.date.slice(0, 10) : a.date instanceof Date ? a.date.toISOString().slice(0, 10) : String(a.date).slice(0, 10),
       servicePrice: parseFloat(a.servicePrice),
       createdAt: a.createdAt.toISOString(),
     })),

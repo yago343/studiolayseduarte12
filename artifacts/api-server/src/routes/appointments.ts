@@ -4,9 +4,17 @@ import { eq, gte, lte, and } from "drizzle-orm";
 
 const router = Router();
 
+function formatDate(d: any): string {
+  if (!d) return d;
+  if (typeof d === "string") return d.slice(0, 10);
+  if (d instanceof Date) return d.toISOString().slice(0, 10);
+  return String(d).slice(0, 10);
+}
+
 function formatAppt(a: any) {
   return {
     ...a,
+    date: formatDate(a.date),
     servicePrice: parseFloat(a.servicePrice),
     createdAt: a.createdAt.toISOString(),
   };

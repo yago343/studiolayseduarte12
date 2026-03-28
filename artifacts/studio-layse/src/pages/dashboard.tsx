@@ -4,6 +4,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { TrendingUp, CalendarDays, Banknote, Users, Star, ArrowUpRight, BarChart2 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { useLocation } from "wouter";
 import {
   AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer,
   BarChart, Bar, CartesianGrid
@@ -14,6 +15,7 @@ const formatCurrency = (val: number) =>
 
 export default function Dashboard() {
   const { data, isLoading, error } = useGetDashboard();
+  const [, navigate] = useLocation();
 
   if (isLoading) {
     return (
@@ -201,19 +203,27 @@ export default function Dashboard() {
             </div>
           ) : (
             <div className="divide-y divide-border/50">
-              {data.upcomingAppointments.map((apt) => (
-                <div key={apt.id} className="flex items-center gap-4 px-5 py-3 hover:bg-muted/30 transition-colors">
-                  {/* Time badge */}
-                  <div className="w-11 h-11 rounded-xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center shrink-0">
-                    <span className="text-[11px] font-bold text-blue-600 dark:text-blue-400 leading-none text-center">{apt.startTime}</span>
+              {data.upcomingAppointments.map((apt) => {
+                const aptDate = apt.date ? format(new Date(apt.date + "T12:00:00"), "dd/MM", { locale: ptBR }) : "";
+                return (
+                  <div
+                    key={apt.id}
+                    onClick={() => navigate(`/agenda?date=${apt.date}`)}
+                    className="flex items-center gap-4 px-5 py-3 hover:bg-muted/30 transition-colors cursor-pointer"
+                  >
+                    {/* Date + Time badge */}
+                    <div className="w-14 h-11 rounded-xl bg-blue-50 dark:bg-blue-900/20 flex flex-col items-center justify-center shrink-0 gap-0">
+                      <span className="text-[10px] font-semibold text-blue-400 dark:text-blue-500 leading-none">{aptDate}</span>
+                      <span className="text-[11px] font-bold text-blue-600 dark:text-blue-400 leading-none">{apt.startTime}</span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-sm text-foreground truncate">{apt.clientName}</p>
+                      <p className="text-xs text-muted-foreground truncate">{apt.serviceName} · {formatCurrency(apt.servicePrice)}</p>
+                    </div>
+                    <StatusBadge status={apt.status} />
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-sm text-foreground truncate">{apt.clientName}</p>
-                    <p className="text-xs text-muted-foreground truncate">{apt.serviceName} · {formatCurrency(apt.servicePrice)}</p>
-                  </div>
-                  <StatusBadge status={apt.status} />
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </CardContent>
