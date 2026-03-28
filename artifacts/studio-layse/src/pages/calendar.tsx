@@ -275,9 +275,8 @@ export default function CalendarPage() {
   const todayApts = aptsForDay(selectedStr);
 
   const isToday = selectedStr === todayStr;
-  const dateLabel = isToday
-    ? "Hoje"
-    : format(currentDate, "EEE, d 'de' MMMM", { locale: ptBR });
+  const dayLabel = isToday ? "Hoje" : format(currentDate, "EEEE", { locale: ptBR });
+  const dateLabel = format(currentDate, "d 'de' MMMM 'de' yyyy", { locale: ptBR });
 
   /* ─── Appointment block ───────────────────────────────────────── */
   function AptBlock({ apt, idx }: { apt: any; idx: number }) {
@@ -321,14 +320,12 @@ export default function CalendarPage() {
             <ChevronLeft className="w-4 h-4" />
           </button>
           <div>
-            <h1 className={`text-xl font-bold leading-tight ${isToday ? "text-primary" : "text-foreground"}`}>
-              {dateLabel}
+            <h1 className={`text-xl font-bold leading-tight capitalize ${isToday ? "text-primary" : "text-foreground"}`}>
+              {dayLabel}
             </h1>
-            {isToday && (
-              <p className="text-xs text-muted-foreground">
-                {format(currentDate, "d 'de' MMMM 'de' yyyy", { locale: ptBR })}
-              </p>
-            )}
+            <p className="text-xs text-muted-foreground font-normal">
+              {dateLabel}
+            </p>
           </div>
           <button
             onClick={() => setCurrentDate(d => addDays(d, 1))}
