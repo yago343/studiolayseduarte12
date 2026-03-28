@@ -368,12 +368,12 @@ export default function CalendarPage() {
       {/* ── Time Grid ── */}
       <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm flex-1 min-h-0 flex flex-col">
         <div ref={gridRef} className="overflow-y-auto flex-1 min-h-0">
-          <div style={{ height: TOTAL_HOURS * HOUR_PX + 12, position: "relative" }} className="flex pt-3">
+          <div style={{ height: TOTAL_HOURS * HOUR_PX, position: "relative" }} className="flex">
             {/* Time labels */}
             <div className="w-12 shrink-0 relative select-none">
-              {HOURS.map(h => (
+              {HOURS.map((h, i) => (
                 <div key={h} style={{ height: HOUR_PX }} className="relative">
-                  <span className="absolute -top-2.5 left-0 text-[10px] text-muted-foreground/60 font-medium w-full text-right pr-2">
+                  <span className={`absolute left-0 text-[10px] text-muted-foreground/60 font-medium w-full text-right pr-2 ${i === 0 ? 'top-1' : '-top-2.5'}`}>
                     {String(h).padStart(2, "0")}:00
                   </span>
                 </div>
