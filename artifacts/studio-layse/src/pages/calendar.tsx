@@ -276,7 +276,7 @@ export default function CalendarPage() {
   function AptBlock({ apt, idx }: { apt: any; idx: number }) {
     const startMins = timeToMins(apt.startTime);
     const endMins = timeToMins(apt.endTime);
-    const top = startMins * MIN_PX;
+    const top = (startMins - DAY_START * 60) * MIN_PX;
     const height = Math.max((endMins - startMins) * MIN_PX, 28);
     return (
       <button
@@ -388,7 +388,7 @@ export default function CalendarPage() {
               {selectedStr === todayStr && (() => {
                 const now = new Date();
                 const mins = now.getHours() * 60 + now.getMinutes();
-                const top = mins * MIN_PX;
+                const top = (mins - DAY_START * 60) * MIN_PX;
                 return (
                   <div style={{ top, position: "absolute", left: 0, right: 0 }} className="flex items-center z-10 pointer-events-none">
                     <div className="w-2 h-2 rounded-full bg-primary shrink-0 -ml-1" />
