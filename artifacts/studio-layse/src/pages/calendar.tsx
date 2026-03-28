@@ -355,8 +355,8 @@ export default function CalendarPage() {
       )}
 
       {/* ── Time Grid ── */}
-      <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
-        <div ref={gridRef} className="overflow-y-auto" style={{ maxHeight: "55vh" }}>
+      <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm flex-1 min-h-0 flex flex-col">
+        <div ref={gridRef} className="overflow-y-auto flex-1 min-h-0">
           <div style={{ height: TOTAL_HOURS * HOUR_PX, position: "relative" }} className="flex">
             {/* Time labels */}
             <div className="w-12 shrink-0 relative select-none">
