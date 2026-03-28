@@ -6,3 +6,9 @@ id = "jkCe9Jt_H4HASRFm8WyuG"
 uri = "file://backups/backup_20260328_012029.json"
 type = "unspecified"
 title = "Backup do Banco de Dados - 28/03/2026"
+
+[[outputs]]
+id = "w-zPNLu2n3zgC7QSHrBww"
+uri = "file://studio-layse-duarte.tar.gz"
+type = "unspecified"
+title = "Studio Layse Duarte — Código Fonte"
