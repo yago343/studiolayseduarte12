@@ -12,6 +12,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import {
   format,
   addDays,
+  subDays,
   startOfMonth,
   endOfMonth,
   eachDayOfInterval,
@@ -35,12 +36,12 @@ import { useToast } from "@/hooks/use-toast";
 import {
   ChevronLeft,
   ChevronRight,
-  ChevronDown,
   Plus,
   CheckCircle2,
   XCircle,
   Clock,
   Trash2,
+  CalendarDays,
 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -54,18 +55,26 @@ const TOTAL_HOURS = DAY_END - DAY_START;
 const HOURS = Array.from({ length: TOTAL_HOURS }, (_, i) => DAY_START + i);
 
 const APT_COLORS = [
-  "bg-sky-200 text-sky-900 border-sky-300",
-  "bg-teal-200 text-teal-900 border-teal-300",
-  "bg-violet-200 text-violet-900 border-violet-300",
-  "bg-rose-200 text-rose-900 border-rose-300",
-  "bg-amber-200 text-amber-900 border-amber-300",
-  "bg-emerald-200 text-emerald-900 border-emerald-300",
+  "bg-sky-100 text-sky-900 border-sky-200",
+  "bg-violet-100 text-violet-900 border-violet-200",
+  "bg-rose-100 text-rose-900 border-rose-200",
+  "bg-amber-100 text-amber-900 border-amber-200",
+  "bg-teal-100 text-teal-900 border-teal-200",
+  "bg-emerald-100 text-emerald-900 border-emerald-200",
 ];
 
+const APT_LEFT_COLORS = ["bg-sky-400", "bg-violet-400", "bg-rose-400", "bg-amber-400", "bg-teal-400", "bg-emerald-400"];
+
 function aptColor(status: string, idx: number) {
-  if (status === "cancelled") return "bg-red-100 text-red-700 border-red-200 opacity-50";
-  if (status === "completed") return "bg-slate-200 text-slate-600 border-slate-300";
+  if (status === "cancelled") return "bg-red-50 text-red-400 border-red-100 opacity-60";
+  if (status === "completed") return "bg-slate-100 text-slate-500 border-slate-200";
   return APT_COLORS[idx % APT_COLORS.length];
+}
+
+function aptLeftColor(status: string, idx: number) {
+  if (status === "cancelled") return "bg-red-300";
+  if (status === "completed") return "bg-slate-300";
+  return APT_LEFT_COLORS[idx % APT_LEFT_COLORS.length];
 }
 
 function timeToMins(t: string) {
@@ -84,7 +93,7 @@ const aptSchema = z.object({
 });
 type AptForm = z.infer<typeof aptSchema>;
 
-/* ─── Mini Calendar Component (collapsible) ─────────────────── */
+/* ─── Mini Calendar Component ────────────────────────────────── */
 function MiniCalendar({
   selected,
   onChange,
@@ -94,47 +103,50 @@ function MiniCalendar({
   onChange: (d: Date) => void;
   appointmentDates: Set<string>;
 }) {
-  const [expanded, setExpanded] = useState(false);
   const [viewMonth, setViewMonth] = useState(new Date(selected));
   const today = new Date();
   const todayStr = format(today, "yyyy-MM-dd");
-  const weekDays = ["S", "T", "Q", "Q", "S", "S", "D"];
+  const weekDays = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"];
 
-  // Current week (Mon → Sun) for collapsed view
-  const weekStart = startOfWeek(selected, { weekStartsOn: 1 });
-  const currentWeek = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
-
-  // Full month data for expanded view
   const monthStart = startOfMonth(viewMonth);
   const monthEnd = endOfMonth(viewMonth);
   const startPad = (getDay(monthStart) + 6) % 7;
   const days = eachDayOfInterval({ start: monthStart, end: monthEnd });
   const allCells: (Date | null)[] = [...Array(startPad).fill(null), ...days];
-  const rows = Math.ceil(allCells.length / 7);
+  while (allCells.length % 7 !== 0) allCells.push(null);
+  const rows = allCells.length / 7;
+
+  const goToPrevMonth = () => setViewMonth(m => subMonths(m, 1));
+  const goToNextMonth = () => setViewMonth(m => addMonths(m, 1));
 
   function DayCell({ day }: { day: Date | null }) {
-    if (!day) return <div />;
+    if (!day) return <div className="h-9" />;
     const dStr = format(day, "yyyy-MM-dd");
     const isSelected = isSameDay(day, selected);
     const isToday = dStr === todayStr;
     const hasApts = appointmentDates.has(dStr);
     const isCurrentMonth = isSameMonth(day, viewMonth);
+
     return (
       <button
-        onClick={() => { onChange(day); setViewMonth(day); if (!expanded) setExpanded(false); }}
-        className={`flex flex-col items-center justify-center h-8 rounded-lg text-xs font-medium transition-all relative ${
+        onClick={() => { onChange(day); setViewMonth(day); }}
+        className={`relative flex flex-col items-center justify-center h-9 w-full rounded-xl text-sm font-medium transition-all duration-150 ${
           isSelected
-            ? "bg-primary text-primary-foreground shadow-sm"
+            ? "bg-primary text-white shadow-md shadow-primary/30 scale-105"
             : isToday
-            ? "border border-primary text-primary"
-            : isCurrentMonth || !expanded
+            ? "bg-primary/10 text-primary font-bold ring-1 ring-primary/30"
+            : isCurrentMonth
             ? "hover:bg-muted text-foreground"
-            : "text-muted-foreground/30"
+            : "text-muted-foreground/30 cursor-default"
         }`}
       >
         {format(day, "d")}
-        {hasApts && !isSelected && (
-          <span className="absolute bottom-0.5 w-1 h-1 rounded-full bg-primary/70" />
+        {hasApts && (
+          <span
+            className={`absolute bottom-1 w-1 h-1 rounded-full transition-all ${
+              isSelected ? "bg-white/70" : "bg-primary"
+            }`}
+          />
         )}
       </button>
     );
@@ -142,67 +154,48 @@ function MiniCalendar({
 
   return (
     <div className="w-full select-none">
-      {/* Header row: prev | month label + toggle | next */}
-      <div className="flex items-center justify-between mb-1.5 px-0.5">
-        {expanded ? (
-          <button
-            onClick={() => setViewMonth(m => subMonths(m, 1))}
-            className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-muted transition-colors"
-          >
-            <ChevronLeft className="w-3.5 h-3.5" />
-          </button>
-        ) : (
-          <div className="w-7" />
-        )}
-
+      {/* Month navigation */}
+      <div className="flex items-center justify-between mb-3">
         <button
-          onClick={() => setExpanded(e => !e)}
-          className="flex items-center gap-1 text-xs font-semibold capitalize text-foreground hover:text-primary transition-colors"
+          onClick={goToPrevMonth}
+          className="w-8 h-8 flex items-center justify-center rounded-xl hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
         >
-          {format(expanded ? viewMonth : selected, "MMMM yyyy", { locale: ptBR })}
-          <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${expanded ? "rotate-180" : ""}`} />
+          <ChevronLeft className="w-4 h-4" />
         </button>
 
-        {expanded ? (
-          <button
-            onClick={() => setViewMonth(m => addMonths(m, 1))}
-            className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-muted transition-colors"
-          >
-            <ChevronRight className="w-3.5 h-3.5" />
-          </button>
-        ) : (
-          <div className="w-7" />
-        )}
+        <button
+          onClick={() => onChange(today)}
+          className="flex items-center gap-1.5 text-sm font-semibold capitalize text-foreground hover:text-primary transition-colors"
+        >
+          <CalendarDays className="w-3.5 h-3.5 text-primary" />
+          {format(viewMonth, "MMMM yyyy", { locale: ptBR })}
+        </button>
+
+        <button
+          onClick={goToNextMonth}
+          className="w-8 h-8 flex items-center justify-center rounded-xl hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
+        >
+          <ChevronRight className="w-4 h-4" />
+        </button>
       </div>
 
       {/* Weekday labels */}
-      <div className="grid grid-cols-7 mb-0.5">
+      <div className="grid grid-cols-7 mb-1">
         {weekDays.map((d, i) => (
-          <div key={i} className="text-center text-[10px] font-semibold text-muted-foreground py-0.5">
+          <div key={i} className="text-center text-[10px] font-bold text-muted-foreground/60 uppercase tracking-wider py-1">
             {d}
           </div>
         ))}
       </div>
 
-      {/* Collapsed: only current week */}
-      {!expanded && (
-        <div className="grid grid-cols-7">
-          {currentWeek.map((day, i) => <DayCell key={i} day={day} />)}
-        </div>
-      )}
-
-      {/* Expanded: full month grid */}
-      {expanded && (
-        <div>
-          {Array.from({ length: rows }, (_, r) => (
-            <div key={r} className="grid grid-cols-7">
-              {allCells.slice(r * 7, r * 7 + 7).map((day, i) => (
-                <DayCell key={i} day={day} />
-              ))}
-            </div>
-          ))}
-        </div>
-      )}
+      {/* Day grid */}
+      <div className="grid grid-cols-7 gap-y-0.5">
+        {Array.from({ length: rows }, (_, r) =>
+          allCells.slice(r * 7, r * 7 + 7).map((day, i) => (
+            <DayCell key={`${r}-${i}`} day={day} />
+          ))
+        )}
+      </div>
     </div>
   );
 }
@@ -225,13 +218,12 @@ export default function CalendarPage() {
   const [paymentMethod, setPaymentMethod] = useState<"pix" | "cash" | "card">("pix");
   const gridRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
-  const HOUR_PX = isMobile ? 48 : 72;
+  const HOUR_PX = isMobile ? 52 : 72;
   const MIN_PX = HOUR_PX / 60;
 
   const todayStr = format(new Date(), "yyyy-MM-dd");
   const selectedStr = format(currentDate, "yyyy-MM-dd");
 
-  /* Wide date range to know which days have appointments for the mini calendar */
   const rangeStart = format(startOfMonth(subMonths(currentDate, 1)), "yyyy-MM-dd");
   const rangeEnd = format(endOfMonth(addMonths(currentDate, 1)), "yyyy-MM-dd");
 
@@ -264,12 +256,10 @@ export default function CalendarPage() {
     defaultValues: { date: selectedStr, startTime: "09:00" },
   });
 
-  /* Sync form date when selected date changes */
   useEffect(() => {
     form.setValue("date", format(currentDate, "yyyy-MM-dd"));
   }, [currentDate]);
 
-  /* Scroll to current hour on mount */
   useEffect(() => {
     if (gridRef.current) {
       const now = new Date();
@@ -282,60 +272,83 @@ export default function CalendarPage() {
     appointments.filter(a => a.date === dateStr).sort((a, b) => a.startTime.localeCompare(b.startTime));
 
   const appointmentDates = new Set(appointments.map(a => a.date));
-
   const todayApts = aptsForDay(selectedStr);
+
+  const isToday = selectedStr === todayStr;
+  const dateLabel = isToday
+    ? "Hoje"
+    : format(currentDate, "EEE, d 'de' MMMM", { locale: ptBR });
 
   /* ─── Appointment block ───────────────────────────────────────── */
   function AptBlock({ apt, idx }: { apt: any; idx: number }) {
     const startMins = timeToMins(apt.startTime);
     const endMins = timeToMins(apt.endTime);
     const top = (startMins - DAY_START * 60) * MIN_PX;
-    const height = Math.max((endMins - startMins) * MIN_PX, 28);
+    const height = Math.max((endMins - startMins) * MIN_PX, 32);
     return (
       <button
         onClick={() => setSelectedApt(apt)}
-        style={{ top, height, position: "absolute", left: 3, right: 3 }}
-        className={`rounded-lg px-2 py-1.5 text-left text-xs font-medium border overflow-hidden shadow-sm hover:brightness-95 active:scale-[0.98] transition-all flex flex-col justify-start gap-0.5 ${aptColor(apt.status, idx)}`}
+        style={{ top, height, position: "absolute", left: 4, right: 4 }}
+        className={`rounded-xl text-left text-xs border overflow-hidden hover:brightness-95 active:scale-[0.98] transition-all flex shadow-sm ${aptColor(apt.status, idx)}`}
       >
-        <div className="font-bold truncate leading-tight text-[11px]">{apt.serviceName}</div>
-        {height >= 38 && (
-          <div className="flex items-center gap-0.5 opacity-80 leading-none">
-            <Clock className="w-2.5 h-2.5 shrink-0" />
-            <span className="text-[10px]">{apt.startTime} – {apt.endTime}</span>
-          </div>
-        )}
-        {height >= 54 && apt.clientName && (
-          <div className="truncate opacity-75 text-[10px] leading-none">{apt.clientName}</div>
-        )}
+        <div className={`w-1 h-full shrink-0 rounded-l-xl ${aptLeftColor(apt.status, idx)}`} />
+        <div className="flex flex-col justify-start gap-0.5 px-2 py-1.5 min-w-0">
+          <div className="font-bold truncate leading-tight text-[11px]">{apt.clientName || apt.serviceName}</div>
+          {height >= 38 && (
+            <div className="truncate text-[10px] opacity-75 leading-none">{apt.serviceName}</div>
+          )}
+          {height >= 52 && (
+            <div className="flex items-center gap-0.5 opacity-60 leading-none mt-0.5">
+              <Clock className="w-2.5 h-2.5 shrink-0" />
+              <span className="text-[10px]">{apt.startTime} – {apt.endTime}</span>
+            </div>
+          )}
+        </div>
       </button>
     );
   }
 
   return (
-    <div className="flex flex-col w-full h-full overflow-x-hidden">
+    <div className="flex flex-col w-full h-full overflow-x-hidden gap-3">
 
       {/* ── Header ── */}
-      <div className="flex items-center justify-between mb-3">
-        <div>
-          <h1 className="text-xl font-bold text-foreground leading-tight">Agenda</h1>
-          <p className="text-xs text-muted-foreground">
-            {selectedStr === todayStr
-              ? "Hoje, " + format(currentDate, "d 'de' MMMM", { locale: ptBR })
-              : format(currentDate, "EEEE, d 'de' MMMM", { locale: ptBR })}
-          </p>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setCurrentDate(d => subDays(d, 1))}
+            className="w-8 h-8 flex items-center justify-center rounded-xl border border-border hover:bg-muted transition-colors text-muted-foreground"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+          <div>
+            <h1 className={`text-xl font-bold leading-tight ${isToday ? "text-primary" : "text-foreground"}`}>
+              {dateLabel}
+            </h1>
+            {isToday && (
+              <p className="text-xs text-muted-foreground">
+                {format(currentDate, "d 'de' MMMM 'de' yyyy", { locale: ptBR })}
+              </p>
+            )}
+          </div>
+          <button
+            onClick={() => setCurrentDate(d => addDays(d, 1))}
+            className="w-8 h-8 flex items-center justify-center rounded-xl border border-border hover:bg-muted transition-colors text-muted-foreground"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </button>
         </div>
         <div className="flex items-center gap-2">
-          {selectedStr !== todayStr && (
+          {!isToday && (
             <button
               onClick={() => setCurrentDate(new Date())}
-              className="px-3 h-7 rounded-full border border-border text-xs font-medium hover:bg-muted transition-colors text-muted-foreground"
+              className="px-3 h-8 rounded-xl border border-primary/30 text-xs font-medium text-primary hover:bg-primary/5 transition-colors"
             >
               Hoje
             </button>
           )}
           <button
             onClick={() => { form.setValue("date", selectedStr); setIsCreateOpen(true); }}
-            className="w-8 h-8 flex items-center justify-center rounded-full bg-primary text-primary-foreground shadow-md"
+            className="w-9 h-9 flex items-center justify-center rounded-xl bg-primary text-white shadow-md shadow-primary/30 hover:brightness-105 transition-all"
           >
             <Plus className="w-4 h-4" />
           </button>
@@ -343,7 +356,7 @@ export default function CalendarPage() {
       </div>
 
       {/* ── Mini Calendar ── */}
-      <div className="bg-card border border-border rounded-2xl p-3 mb-3 shadow-sm">
+      <div className="bg-card border border-border rounded-2xl px-4 pt-4 pb-3 shadow-sm">
         <MiniCalendar
           selected={currentDate}
           onChange={setCurrentDate}
@@ -351,19 +364,30 @@ export default function CalendarPage() {
         />
       </div>
 
-      {/* ── Day summary chips ── */}
-      {todayApts.length > 0 && (
-        <div className="flex gap-1.5 flex-wrap mb-2">
-          {todayApts.map((apt, i) => (
-            <button
-              key={apt.id}
-              onClick={() => setSelectedApt(apt)}
-              className={`text-[10px] font-medium px-2.5 py-1 rounded-full border ${aptColor(apt.status, i)} flex items-center gap-1`}
-            >
-              <Clock className="w-2.5 h-2.5" />
-              {apt.startTime} · {apt.clientName || apt.serviceName}
-            </button>
-          ))}
+      {/* ── Day summary ── */}
+      {todayApts.length > 0 ? (
+        <div className="bg-card border border-border rounded-2xl px-4 py-3 shadow-sm">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2">
+            {todayApts.length} agendamento{todayApts.length > 1 ? "s" : ""} neste dia
+          </p>
+          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+            {todayApts.map((apt, i) => (
+              <button
+                key={apt.id}
+                onClick={() => setSelectedApt(apt)}
+                className={`shrink-0 flex items-center gap-1.5 text-[11px] font-medium px-3 py-1.5 rounded-xl border ${aptColor(apt.status, i)} transition-all hover:brightness-95`}
+              >
+                <Clock className="w-3 h-3 shrink-0" />
+                <span className="font-bold">{apt.startTime}</span>
+                <span className="opacity-70">·</span>
+                <span className="max-w-[80px] truncate">{apt.clientName || apt.serviceName}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <div className="bg-muted/40 border border-dashed border-border rounded-2xl px-4 py-3 text-center">
+          <p className="text-xs text-muted-foreground">Nenhum agendamento neste dia</p>
         </div>
       )}
 
@@ -372,30 +396,28 @@ export default function CalendarPage() {
         <div ref={gridRef} className="overflow-y-auto flex-1 min-h-0">
           <div style={{ height: TOTAL_HOURS * HOUR_PX, position: "relative" }} className="flex">
             {/* Time labels */}
-            <div className="w-12 shrink-0 relative select-none">
+            <div className="w-14 shrink-0 relative select-none bg-card/50">
               {HOURS.map((h, i) => (
                 <div key={h} style={{ height: HOUR_PX }} className="relative">
-                  <span className={`absolute left-0 text-[10px] text-muted-foreground/60 font-medium w-full text-right pr-2 ${i === 0 ? 'top-1' : '-top-2.5'}`}>
-                    {String(h).padStart(2, "0")}:00
+                  <span className={`absolute left-0 text-[10px] text-muted-foreground/50 font-medium w-full text-right pr-3 ${i === 0 ? "top-1" : "-top-2.5"}`}>
+                    {String(h).padStart(2, "0")}h
                   </span>
                 </div>
               ))}
-              {/* 20:00 end label */}
               <div className="relative h-0">
-                <span className="absolute -top-2.5 left-0 text-[10px] text-muted-foreground/60 font-medium w-full text-right pr-2">
-                  20:00
+                <span className="absolute -top-2.5 left-0 text-[10px] text-muted-foreground/50 font-medium w-full text-right pr-3">
+                  20h
                 </span>
               </div>
             </div>
 
             {/* Grid column */}
-            <div className="flex-1 relative border-l border-border/40">
-              {HOURS.map(h => (
-                <div
-                  key={h}
-                  style={{ height: HOUR_PX }}
-                  className="border-b border-border/25"
-                />
+            <div className="flex-1 relative border-l border-border/30">
+              {HOURS.map((h, i) => (
+                <div key={h} style={{ height: HOUR_PX }} className="relative border-b border-border/20">
+                  {/* Half-hour line */}
+                  <div className="absolute left-0 right-0 border-b border-dashed border-border/15" style={{ top: HOUR_PX / 2 }} />
+                </div>
               ))}
 
               {/* Appointment blocks */}
@@ -410,8 +432,8 @@ export default function CalendarPage() {
                 const top = (mins - DAY_START * 60) * MIN_PX;
                 return (
                   <div style={{ top, position: "absolute", left: 0, right: 0 }} className="flex items-center z-10 pointer-events-none">
-                    <div className="w-2 h-2 rounded-full bg-primary shrink-0 -ml-1" />
-                    <div className="flex-1 h-px bg-primary" />
+                    <div className="w-2.5 h-2.5 rounded-full bg-primary shadow-md shadow-primary/40 shrink-0 -ml-1.5" />
+                    <div className="flex-1 h-0.5 bg-primary shadow-sm" />
                   </div>
                 );
               })()}
@@ -432,16 +454,16 @@ export default function CalendarPage() {
           >
             <div className="space-y-1">
               <label className="text-xs font-medium">Nome da Cliente *</label>
-              <Input {...form.register("clientName")} placeholder="Ex: Maria Silva" className="rounded-lg h-9 text-sm" />
+              <Input {...form.register("clientName")} placeholder="Ex: Maria Silva" className="rounded-xl h-10 text-sm" />
               {form.formState.errors.clientName && <p className="text-xs text-red-500">{form.formState.errors.clientName.message}</p>}
             </div>
             <div className="space-y-1">
               <label className="text-xs font-medium">Telefone</label>
-              <Input {...form.register("clientPhone")} placeholder="(11) 99999-9999" className="rounded-lg h-9 text-sm" />
+              <Input {...form.register("clientPhone")} placeholder="(11) 99999-9999" className="rounded-xl h-10 text-sm" />
             </div>
             <div className="space-y-1">
               <label className="text-xs font-medium">Serviço *</label>
-              <select {...form.register("serviceId")} className="w-full h-9 px-3 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/20">
+              <select {...form.register("serviceId")} className="w-full h-10 px-3 rounded-xl border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/20">
                 <option value="">Selecione...</option>
                 {services.map(s => <option key={s.id} value={s.id}>{s.name} — R$ {Number(s.price).toFixed(2).replace(".", ",")}</option>)}
               </select>
@@ -450,20 +472,20 @@ export default function CalendarPage() {
             <div className="grid grid-cols-2 gap-2">
               <div className="space-y-1">
                 <label className="text-xs font-medium">Data *</label>
-                <Input type="date" {...form.register("date")} className="rounded-lg h-9 text-sm" />
+                <Input type="date" {...form.register("date")} className="rounded-xl h-10 text-sm" />
               </div>
               <div className="space-y-1">
                 <label className="text-xs font-medium">Hora *</label>
-                <Input type="time" {...form.register("startTime")} className="rounded-lg h-9 text-sm" />
+                <Input type="time" {...form.register("startTime")} className="rounded-xl h-10 text-sm" />
               </div>
             </div>
             <div className="space-y-1">
               <label className="text-xs font-medium">Observações</label>
-              <Input {...form.register("notes")} placeholder="Opcional..." className="rounded-lg h-9 text-sm" />
+              <Input {...form.register("notes")} placeholder="Opcional..." className="rounded-xl h-10 text-sm" />
             </div>
             <div className="flex gap-2 pt-1">
-              <Button type="button" variant="outline" className="flex-1 rounded-lg h-9 text-sm" onClick={() => setIsCreateOpen(false)}>Cancelar</Button>
-              <Button type="submit" disabled={createMut.isPending} className="flex-1 rounded-lg h-9 text-sm">
+              <Button type="button" variant="outline" className="flex-1 rounded-xl h-10 text-sm" onClick={() => setIsCreateOpen(false)}>Cancelar</Button>
+              <Button type="submit" disabled={createMut.isPending} className="flex-1 rounded-xl h-10 text-sm">
                 {createMut.isPending ? "Salvando..." : "Confirmar"}
               </Button>
             </div>
@@ -483,17 +505,19 @@ export default function CalendarPage() {
               }`}>
                 <div className="flex items-start justify-between">
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-1">
                       {selectedApt.status === "confirmed" ? "✅ Confirmado" :
                        selectedApt.status === "completed" ? "🎉 Concluído" :
                        selectedApt.status === "cancelled" ? "❌ Cancelado" : "🔒 Bloqueado"}
                     </p>
-                    <h3 className="text-xl font-bold mt-1">{selectedApt.clientName}</h3>
+                    <h3 className="text-xl font-bold">{selectedApt.clientName}</h3>
                     <p className="text-sm text-muted-foreground mt-0.5">{selectedApt.serviceName}</p>
                   </div>
-                  <p className="text-lg font-bold text-primary">
-                    R$ {Number(selectedApt.servicePrice).toFixed(2).replace(".", ",")}
-                  </p>
+                  <div className="text-right">
+                    <p className="text-lg font-bold text-primary">
+                      R$ {Number(selectedApt.servicePrice).toFixed(2).replace(".", ",")}
+                    </p>
+                  </div>
                 </div>
                 <div className="flex items-center gap-1.5 mt-3 text-sm text-muted-foreground">
                   <Clock className="w-4 h-4" />
@@ -508,41 +532,43 @@ export default function CalendarPage() {
               <div className="p-4 space-y-2">
                 {selectedApt.status === "confirmed" && (
                   <>
-                    <p className="text-xs font-medium text-muted-foreground mb-2">Forma de pagamento:</p>
+                    <p className="text-xs font-bold text-muted-foreground mb-2 uppercase tracking-wider">Pagamento</p>
                     <div className="grid grid-cols-3 gap-2 mb-3">
                       {(["pix", "cash", "card"] as const).map(m => (
                         <button key={m} onClick={() => setPaymentMethod(m)}
-                          className={`py-2 rounded-lg text-xs font-medium border transition-all ${
-                            paymentMethod === m ? "bg-primary text-primary-foreground border-primary" : "border-border hover:bg-muted"
+                          className={`py-2.5 rounded-xl text-xs font-medium border transition-all ${
+                            paymentMethod === m
+                              ? "bg-primary text-white border-primary shadow-md shadow-primary/20"
+                              : "border-border hover:bg-muted"
                           }`}>
                           {m === "pix" ? "💸 Pix" : m === "cash" ? "💵 Dinheiro" : "💳 Cartão"}
                         </button>
                       ))}
                     </div>
                     <Button
-                      className="w-full rounded-lg h-10 bg-emerald-600 hover:bg-emerald-700 text-white"
+                      className="w-full rounded-xl h-11 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold"
                       onClick={() => statusMut.mutate({ id: selectedApt.id, data: { status: "completed", paymentMethod } })}
                       disabled={statusMut.isPending}
                     >
                       <CheckCircle2 className="w-4 h-4 mr-2" /> Marcar como Concluído
                     </Button>
-                    <Button variant="outline" className="w-full rounded-lg h-10 text-red-600 border-red-200 hover:bg-red-50"
+                    <Button variant="outline" className="w-full rounded-xl h-10 text-red-500 border-red-200 hover:bg-red-50"
                       onClick={() => statusMut.mutate({ id: selectedApt.id, data: { status: "cancelled" } })}
                       disabled={statusMut.isPending}
                     >
-                      <XCircle className="w-4 h-4 mr-2" /> Cancelar Agendamento
+                      <XCircle className="w-4 h-4 mr-2" /> Cancelar
                     </Button>
                   </>
                 )}
                 <div className="flex gap-2 pt-1">
                   <Button variant="outline" size="sm"
-                    className="flex-1 rounded-lg text-red-500 border-red-200 hover:bg-red-50 h-9"
+                    className="flex-1 rounded-xl text-red-500 border-red-200 hover:bg-red-50 h-10"
                     onClick={() => { if (confirm("Excluir permanentemente?")) deleteMut.mutate({ id: selectedApt.id }); }}
                     disabled={deleteMut.isPending}
                   >
                     <Trash2 className="w-3.5 h-3.5 mr-1" /> Excluir
                   </Button>
-                  <Button variant="ghost" size="sm" className="flex-1 rounded-lg h-9" onClick={() => setSelectedApt(null)}>Fechar</Button>
+                  <Button variant="ghost" size="sm" className="flex-1 rounded-xl h-10" onClick={() => setSelectedApt(null)}>Fechar</Button>
                 </div>
               </div>
             </>
