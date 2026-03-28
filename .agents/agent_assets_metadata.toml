@@ -24,3 +24,9 @@ id = "Iar7tqbxPMlsJDx_OCkbx"
 uri = "file://studio-layse-completo.tar.gz"
 type = "unspecified"
 title = "Studio Layse Duarte — Projeto Completo"
+
+[[outputs]]
+id = "xD_D3XYk0iuwoB1X377FG"
+uri = "file://studio-layse-dist.tar.gz"
+type = "unspecified"
+title = "Studio Layse Duarte — Build (dist)"
