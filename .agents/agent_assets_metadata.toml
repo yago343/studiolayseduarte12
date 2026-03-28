@@ -1,0 +1,8 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "jkCe9Jt_H4HASRFm8WyuG"
+uri = "file://backups/backup_20260328_012029.json"
+type = "unspecified"
+title = "Backup do Banco de Dados - 28/03/2026"
