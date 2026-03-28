@@ -17,6 +17,7 @@ import SettingsPage from "./pages/settings";
 import PublicBooking from "./pages/public-booking";
 import AuthPage from "./pages/auth";
 import CompleteProfilePage from "./pages/complete-profile";
+import UsersPage from "./pages/users";
 
 const queryClient = new QueryClient();
 
@@ -76,6 +77,9 @@ function Router() {
       </Route>
       <Route path="/configuracoes">
         <AppLayout><SettingsPage /></AppLayout>
+      </Route>
+      <Route path="/usuarios">
+        <AppLayout><UsersPage /></AppLayout>
       </Route>
 
       <Route>

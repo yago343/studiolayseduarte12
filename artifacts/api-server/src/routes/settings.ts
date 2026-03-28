@@ -207,6 +207,31 @@ router.get("/availability", async (req, res) => {
   res.json(slots);
 });
 
+// Public: register user (save to clients table so admin can see who signed up)
+router.post("/public/register-user", async (req, res) => {
+  const { name, phone, email } = req.body;
+  if (!email) return res.status(400).json({ error: "email required" });
+
+  const existing = await db.select().from(clientsTable);
+  const found = existing.find(c => c.email === email);
+  if (found) {
+    // Update name/phone if better data is available
+    if ((name && name !== found.name) || (phone && phone !== found.phone)) {
+      await db.update(clientsTable)
+        .set({ name: name || found.name, phone: phone || found.phone })
+        .where(eq(clientsTable.id, found.id));
+    }
+    return res.json({ ok: true });
+  }
+
+  await db.insert(clientsTable).values({
+    name: name || email.split("@")[0],
+    phone: phone || null,
+    email,
+  });
+  res.json({ ok: true });
+});
+
 // Public booking
 router.post("/public/book", async (req, res) => {
   const { clientName, clientPhone, clientEmail, serviceId, serviceIds, date, startTime, notes } = req.body;

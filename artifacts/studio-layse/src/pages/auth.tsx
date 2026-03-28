@@ -5,9 +5,18 @@ import { useGetSettings } from "@workspace/api-client-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { FcGoogle } from "react-icons/fc";
 
 type Tab = "entrar" | "cadastrar";
+
+async function saveUserToDb(name: string, phone: string, email: string) {
+  try {
+    await fetch("/api/public/register-user", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, phone, email }),
+    });
+  } catch {}
+}
 
 export default function AuthPage() {
   const { data: settings } = useGetSettings();
@@ -20,22 +29,6 @@ export default function AuthPage() {
   const studioName = settings?.studioName || "Studio Layse";
   const primaryColor = settings?.primaryColor || "hsl(350 45% 65%)";
   const publicLogo = (settings as any)?.publicLogoUrl || null;
-
-  const appOrigin = window.location.origin + (import.meta.env.BASE_URL || "/");
-
-  const handleGoogleLogin = async () => {
-    setLoading(true);
-    setError("");
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: appOrigin + "agendar",
-        queryParams: { prompt: "select_account" },
-      },
-    });
-    if (error) setError(error.message);
-    setLoading(false);
-  };
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -81,13 +74,13 @@ export default function AuthPage() {
       password,
       options: {
         data: { name, phone },
-        emailRedirectTo: appOrigin + "agendar",
       },
     });
 
     if (error) {
       setError(error.message);
     } else {
+      await saveUserToDb(name, phone, email);
       setSuccess(
         "Cadastro realizado! Verifique seu e-mail para confirmar a conta e depois faça login."
       );
@@ -142,23 +135,6 @@ export default function AuthPage() {
           </div>
 
           <CardContent className="p-6 sm:p-8">
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full h-12 rounded-2xl border-2 font-medium flex items-center gap-3 mb-6"
-              onClick={handleGoogleLogin}
-              disabled={loading}
-            >
-              <FcGoogle className="w-5 h-5" />
-              Continuar com Google
-            </Button>
-
-            <div className="flex items-center gap-3 mb-6">
-              <div className="flex-1 h-px bg-border" />
-              <span className="text-xs text-muted-foreground">ou</span>
-              <div className="flex-1 h-px bg-border" />
-            </div>
-
             {error && (
               <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">
                 {error}
@@ -179,6 +155,7 @@ export default function AuthPage() {
                     type="email"
                     required
                     placeholder="seu@email.com"
+                    autoComplete="email"
                     className="h-12 rounded-2xl bg-muted/30 border-none px-5"
                   />
                 </div>
@@ -189,6 +166,7 @@ export default function AuthPage() {
                     type="password"
                     required
                     placeholder="••••••••"
+                    autoComplete="current-password"
                     className="h-12 rounded-2xl bg-muted/30 border-none px-5"
                   />
                 </div>
@@ -211,6 +189,7 @@ export default function AuthPage() {
                     name="name"
                     required
                     placeholder="Seu nome"
+                    autoComplete="name"
                     className="h-12 rounded-2xl bg-muted/30 border-none px-5"
                   />
                 </div>
@@ -221,6 +200,7 @@ export default function AuthPage() {
                     type="tel"
                     required
                     placeholder="(00) 00000-0000"
+                    autoComplete="tel"
                     className="h-12 rounded-2xl bg-muted/30 border-none px-5"
                   />
                 </div>
@@ -231,6 +211,7 @@ export default function AuthPage() {
                     type="email"
                     required
                     placeholder="seu@email.com"
+                    autoComplete="email"
                     className="h-12 rounded-2xl bg-muted/30 border-none px-5"
                   />
                 </div>
@@ -241,6 +222,7 @@ export default function AuthPage() {
                     type="password"
                     required
                     placeholder="Mínimo 6 caracteres"
+                    autoComplete="new-password"
                     className="h-12 rounded-2xl bg-muted/30 border-none px-5"
                   />
                 </div>
@@ -251,6 +233,7 @@ export default function AuthPage() {
                     type="password"
                     required
                     placeholder="Repita a senha"
+                    autoComplete="new-password"
                     className="h-12 rounded-2xl bg-muted/30 border-none px-5"
                   />
                 </div>
