@@ -1,11 +1,9 @@
-import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
+import { Switch, Route, Router as WouterRouter } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import { AppLayout } from "@/components/layout/app-layout";
-import { AuthProvider, useAuth } from "@/contexts/auth-context";
-import { useEffect } from "react";
 
 import Dashboard from "./pages/dashboard";
 import CalendarPage from "./pages/calendar";
@@ -15,44 +13,14 @@ import FinancesPage from "./pages/finances";
 import SchedulePage from "./pages/schedule";
 import SettingsPage from "./pages/settings";
 import PublicBooking from "./pages/public-booking";
-import AuthPage from "./pages/auth";
-import CompleteProfilePage from "./pages/complete-profile";
 import UsersPage from "./pages/users";
 
 const queryClient = new QueryClient();
 
-function ProtectedBooking() {
-  const { user, isLoading } = useAuth();
-  const [, navigate] = useLocation();
-
-  useEffect(() => {
-    if (isLoading) return;
-    if (!user) {
-      navigate("/entrar");
-    } else if (!user.phone) {
-      navigate("/completar-perfil");
-    }
-  }, [user, isLoading, navigate]);
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
-      </div>
-    );
-  }
-
-  if (!user || !user.phone) return null;
-
-  return <PublicBooking />;
-}
-
 function Router() {
   return (
     <Switch>
-      <Route path="/entrar" component={AuthPage} />
-      <Route path="/completar-perfil" component={CompleteProfilePage} />
-      <Route path="/agendar" component={ProtectedBooking} />
+      <Route path="/agendar" component={PublicBooking} />
 
       <Route path="/">
         <AppLayout><CalendarPage /></AppLayout>
@@ -94,9 +62,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-          <AuthProvider>
-            <Router />
-          </AuthProvider>
+          <Router />
         </WouterRouter>
         <Toaster />
       </TooltipProvider>
