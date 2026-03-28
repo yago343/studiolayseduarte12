@@ -43,6 +43,11 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const adminLogo = (settings as any)?.adminLogoUrl || null;
   const studioName = (settings as any)?.studioName || "Studio Layse";
 
+  const MOBILE_NAME_LIMIT = 16;
+  const mobileStudioName = studioName.length > MOBILE_NAME_LIMIT
+    ? studioName.slice(0, MOBILE_NAME_LIMIT).trimEnd() + "…"
+    : studioName;
+
   useEffect(() => {
     const isDark = document.documentElement.classList.contains("dark") || 
                    localStorage.theme === 'dark';
@@ -140,14 +145,14 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               <div className="w-8 h-8 rounded-full overflow-hidden shrink-0 border-2 border-border shadow-sm">
                 <img src={adminLogo} alt="Logo" className="w-full h-full object-cover" />
               </div>
-              <span className="font-bold text-sm text-foreground truncate max-w-[130px]">{studioName}</span>
+              <span className="font-bold text-sm text-foreground">{mobileStudioName}</span>
             </>
           ) : (
             <>
               <div className="w-8 h-8 rounded-xl brand-gradient flex items-center justify-center shadow-sm shrink-0">
                 <Scissors className="w-4 h-4 text-white" />
               </div>
-              <span className="font-bold text-sm text-foreground">{studioName}</span>
+              <span className="font-bold text-sm text-foreground">{mobileStudioName}</span>
             </>
           )}
         </div>
@@ -195,14 +200,14 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                       <div className="w-8 h-8 rounded-full overflow-hidden shrink-0 border-2 border-border shadow-sm">
                         <img src={adminLogo} alt="Logo" className="w-full h-full object-cover" />
                       </div>
-                      <span className="font-bold text-sm text-foreground truncate max-w-[130px]">{studioName}</span>
+                      <span className="font-bold text-sm text-foreground">{mobileStudioName}</span>
                     </>
                   ) : (
                     <>
                       <div className="w-7 h-7 rounded-lg brand-gradient flex items-center justify-center">
                         <Scissors className="w-3.5 h-3.5 text-white" />
                       </div>
-                      <span className="font-bold text-sm text-foreground">{studioName}</span>
+                      <span className="font-bold text-sm text-foreground">{mobileStudioName}</span>
                     </>
                   )}
                 </div>
