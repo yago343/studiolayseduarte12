@@ -5,6 +5,7 @@ import { TrendingUp, CalendarDays, Banknote, Users, Star, ArrowUpRight, BarChart
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useLocation } from "wouter";
+import { useState } from "react";
 import {
   AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer,
   BarChart, Bar, CartesianGrid
@@ -13,9 +14,18 @@ import {
 const formatCurrency = (val: number) =>
   new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
 
+type Period = "day" | "week" | "month";
+
+const PERIODS: { key: Period; label: string }[] = [
+  { key: "day",   label: "Hoje"   },
+  { key: "week",  label: "Semana" },
+  { key: "month", label: "Mês"    },
+];
+
 export default function Dashboard() {
   const { data, isLoading, error } = useGetDashboard();
   const [, navigate] = useLocation();
+  const [period, setPeriod] = useState<Period>("day");
 
   if (isLoading) {
     return (
@@ -40,6 +50,12 @@ export default function Dashboard() {
 
   const todayFormatted = format(new Date(), "EEEE, d 'de' MMMM", { locale: ptBR });
 
+  const revenue = period === "day" ? data.todayRevenue : period === "week" ? data.weekRevenue : data.monthRevenue;
+  const appointments = period === "day" ? data.todayAppointments : period === "week" ? data.weekAppointments : data.monthAppointments;
+
+  const periodLabel = period === "day" ? "hoje" : period === "week" ? "esta semana" : "este mês";
+  const revenueLabel = period === "day" ? "Faturamento hoje" : period === "week" ? "Esta semana" : "Este mês";
+
   return (
     <div className="space-y-5 pb-10">
 
@@ -49,31 +65,43 @@ export default function Dashboard() {
           <h1 className="text-2xl font-bold text-foreground">Visão Geral</h1>
           <p className="text-sm text-muted-foreground capitalize mt-0.5">{todayFormatted}</p>
         </div>
-        <div className="flex items-center gap-2 text-sm text-muted-foreground bg-card border border-border px-3.5 py-2 rounded-xl shadow-sm self-start sm:self-auto">
-          <CalendarDays className="w-4 h-4 text-blue-500" />
-          <span className="font-medium text-foreground">{data.todayAppointments}</span>
-          <span>agendamentos hoje</span>
+
+        {/* Period selector */}
+        <div className="flex items-center gap-1 bg-muted/60 border border-border rounded-xl p-1 self-start sm:self-auto">
+          {PERIODS.map(p => (
+            <button
+              key={p.key}
+              onClick={() => setPeriod(p.key)}
+              className={`px-4 py-1.5 text-sm font-semibold rounded-lg transition-all ${
+                period === p.key
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {p.label}
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* Metric Cards — each with its semantic color */}
+      {/* Metric Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <MetricCard
-          label="Faturamento hoje"
-          value={formatCurrency(data.todayRevenue)}
+          label={revenueLabel}
+          value={formatCurrency(revenue)}
           icon={<Banknote className="w-4 h-4" />}
           iconClass="bg-emerald-100 text-emerald-600 dark:bg-emerald-900/40 dark:text-emerald-400"
           accent="border-l-emerald-500"
         />
         <MetricCard
-          label="Esta semana"
-          value={formatCurrency(data.weekRevenue)}
-          icon={<TrendingUp className="w-4 h-4" />}
+          label={`Atendimentos ${periodLabel}`}
+          value={String(appointments)}
+          icon={<CalendarDays className="w-4 h-4" />}
           iconClass="bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400"
           accent="border-l-blue-500"
         />
         <MetricCard
-          label="Este mês"
+          label="Faturamento mensal"
           value={formatCurrency(data.monthRevenue)}
           icon={<BarChart2 className="w-4 h-4" />}
           iconClass="bg-violet-100 text-violet-600 dark:bg-violet-900/40 dark:text-violet-400"
@@ -86,6 +114,15 @@ export default function Dashboard() {
           iconClass="bg-amber-100 text-amber-600 dark:bg-amber-900/40 dark:text-amber-400"
           accent="border-l-amber-500"
         />
+      </div>
+
+      {/* Summary banner */}
+      <div className="flex items-center gap-3 bg-primary/5 border border-primary/10 rounded-2xl px-4 py-3 text-sm">
+        <TrendingUp className="w-4 h-4 text-primary shrink-0" />
+        <span className="text-muted-foreground">
+          <span className="font-semibold text-foreground">{appointments}</span> atendimento{appointments !== 1 ? 's' : ''} e{' '}
+          <span className="font-semibold text-foreground">{formatCurrency(revenue)}</span> em receita {periodLabel}.
+        </span>
       </div>
 
       {/* Charts */}
@@ -211,7 +248,6 @@ export default function Dashboard() {
                     onClick={() => navigate(`/agenda?date=${apt.date}`)}
                     className="flex items-center gap-4 px-5 py-3 hover:bg-muted/30 transition-colors cursor-pointer"
                   >
-                    {/* Date + Time badge */}
                     <div className="w-14 h-11 rounded-xl bg-blue-50 dark:bg-blue-900/20 flex flex-col items-center justify-center shrink-0 gap-0">
                       <span className="text-[10px] font-semibold text-blue-400 dark:text-blue-500 leading-none">{aptDate}</span>
                       <span className="text-[11px] font-bold text-blue-600 dark:text-blue-400 leading-none">{apt.startTime}</span>
@@ -232,7 +268,6 @@ export default function Dashboard() {
   );
 }
 
-/* ── Metric Card ── */
 function MetricCard({ label, value, icon, iconClass, accent }: {
   label: string;
   value: string;
@@ -253,7 +288,6 @@ function MetricCard({ label, value, icon, iconClass, accent }: {
   );
 }
 
-/* ── Status Badge ── */
 function StatusBadge({ status }: { status: string }) {
   const map: Record<string, string> = {
     confirmed: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
