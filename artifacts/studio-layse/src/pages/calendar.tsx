@@ -3,6 +3,7 @@ import { useSearch } from "wouter";
 import {
   useListAppointments,
   useListServices,
+  useListClients,
   useCreateAppointment,
   useUpdateAppointmentStatus,
   useDeleteAppointment,
@@ -230,6 +231,9 @@ export default function CalendarPage() {
 
   const { data: appointments = [] } = useListAppointments({ startDate: rangeStart, endDate: rangeEnd });
   const { data: services = [] } = useListServices();
+  const { data: clients = [] } = useListClients();
+  const [clientSearch, setClientSearch] = useState("");
+  const [showClientSuggestions, setShowClientSuggestions] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const invalidate = () => queryClient.invalidateQueries({ queryKey: getListAppointmentsQueryKey() });
@@ -240,6 +244,7 @@ export default function CalendarPage() {
         invalidate();
         toast({ title: "Agendamento criado! ✨" });
         setIsCreateOpen(false);
+        setClientSearch("");
         form.reset();
       },
       onError: () => toast({ title: "Erro ao criar agendamento", variant: "destructive" }),
@@ -441,7 +446,7 @@ export default function CalendarPage() {
       </div>
 
       {/* ── CREATE MODAL ── */}
-      <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+      <Dialog open={isCreateOpen} onOpenChange={v => { setIsCreateOpen(v); if (!v) { setClientSearch(""); setShowClientSuggestions(false); } }}>
         <DialogContent className="rounded-2xl w-[90vw] max-w-sm mx-auto">
           <DialogHeader>
             <DialogTitle className="text-base font-bold">Novo Agendamento</DialogTitle>
@@ -452,7 +457,48 @@ export default function CalendarPage() {
           >
             <div className="space-y-1">
               <label className="text-xs font-medium">Nome da Cliente *</label>
-              <Input {...form.register("clientName")} placeholder="Ex: Maria Silva" className="rounded-xl h-10 text-sm" />
+              <div className="relative">
+                <Input
+                  value={clientSearch}
+                  onChange={e => {
+                    setClientSearch(e.target.value);
+                    form.setValue("clientName", e.target.value);
+                    setShowClientSuggestions(true);
+                  }}
+                  onFocus={() => setShowClientSuggestions(true)}
+                  onBlur={() => setTimeout(() => setShowClientSuggestions(false), 150)}
+                  placeholder="Ex: Maria Silva"
+                  className="rounded-xl h-10 text-sm"
+                  autoComplete="off"
+                />
+                {showClientSuggestions && clients.filter(c =>
+                  clientSearch.length === 0 || c.name.toLowerCase().includes(clientSearch.toLowerCase())
+                ).length > 0 && (
+                  <div className="absolute z-50 w-full mt-1 bg-popover border border-border rounded-xl shadow-lg overflow-hidden">
+                    <div className="max-h-44 overflow-y-auto divide-y divide-border">
+                      {clients
+                        .filter(c => clientSearch.length === 0 || c.name.toLowerCase().includes(clientSearch.toLowerCase()))
+                        .slice(0, 8)
+                        .map(c => (
+                          <button
+                            key={c.id}
+                            type="button"
+                            className="w-full text-left px-3 py-2.5 hover:bg-muted transition-colors"
+                            onMouseDown={() => {
+                              form.setValue("clientName", c.name);
+                              form.setValue("clientPhone", c.phone ?? "");
+                              setClientSearch(c.name);
+                              setShowClientSuggestions(false);
+                            }}
+                          >
+                            <p className="text-sm font-medium leading-tight">{c.name}</p>
+                            {c.phone && <p className="text-xs text-muted-foreground leading-tight">{c.phone}</p>}
+                          </button>
+                        ))}
+                    </div>
+                  </div>
+                )}
+              </div>
               {form.formState.errors.clientName && <p className="text-xs text-red-500">{form.formState.errors.clientName.message}</p>}
             </div>
             <div className="space-y-1">
@@ -482,7 +528,7 @@ export default function CalendarPage() {
               <Input {...form.register("notes")} placeholder="Opcional..." className="rounded-xl h-10 text-sm" />
             </div>
             <div className="flex gap-2 pt-1">
-              <Button type="button" variant="outline" className="flex-1 rounded-xl h-10 text-sm" onClick={() => setIsCreateOpen(false)}>Cancelar</Button>
+              <Button type="button" variant="outline" className="flex-1 rounded-xl h-10 text-sm" onClick={() => { setIsCreateOpen(false); setClientSearch(""); setShowClientSuggestions(false); }}>Cancelar</Button>
               <Button type="submit" disabled={createMut.isPending} className="flex-1 rounded-xl h-10 text-sm">
                 {createMut.isPending ? "Salvando..." : "Confirmar"}
               </Button>
