@@ -26,6 +26,7 @@ export * from "./financialSummary";
 export * from "./financialSummaryDailyRevenueItem";
 export * from "./financialSummaryExpensesByCategoryItem";
 export * from "./financialSummaryIncomeByPaymentMethod";
+export * from "./getAvailability200Item";
 export * from "./getAvailabilityParams";
 export * from "./getFinancialSummaryParams";
 export * from "./healthStatus";

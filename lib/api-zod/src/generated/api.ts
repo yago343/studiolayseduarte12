@@ -590,7 +590,11 @@ export const GetAvailabilityQueryParams = zod.object({
   serviceId: zod.coerce.number(),
 });
 
-export const GetAvailabilityResponseItem = zod.string();
+export const GetAvailabilityResponseItem = zod.object({
+  time: zod.string(),
+  available: zod.boolean(),
+  reason: zod.string().optional(),
+});
 export const GetAvailabilityResponse = zod.array(GetAvailabilityResponseItem);
 
 /**

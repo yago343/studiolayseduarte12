@@ -150,22 +150,32 @@ export default function PublicBooking() {
                 
                 {loadingAvail ? (
                   <div className="text-center py-10 text-muted-foreground">Carregando horários...</div>
-                ) : availability?.length === 0 ? (
+                ) : !availability || availability.length === 0 ? (
                   <div className="text-center py-10 bg-muted/30 rounded-2xl">
                     Nenhum horário disponível neste dia. Tente outra data.
                   </div>
                 ) : (
-                  <div className="grid grid-cols-3 gap-3">
-                    {availability?.map(time => (
-                      <div 
-                        key={time}
-                        onClick={() => { setSelectedTime(time); setStep(4); }}
-                        className="p-4 rounded-xl text-center font-medium bg-muted/30 hover:bg-primary/10 hover:text-primary cursor-pointer transition-colors border border-transparent hover:border-primary/20"
-                      >
-                        {time}
-                      </div>
-                    ))}
-                  </div>
+                  <>
+                    <div className="flex gap-4 mb-4 text-xs text-muted-foreground">
+                      <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-emerald-500 inline-block" /> Disponível</span>
+                      <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-muted-foreground/30 inline-block" /> Ocupado</span>
+                    </div>
+                    <div className="grid grid-cols-3 gap-3">
+                      {availability.map(slot => (
+                        <div 
+                          key={slot.time}
+                          onClick={() => { if (slot.available) { setSelectedTime(slot.time); setStep(4); } }}
+                          className={`p-4 rounded-xl text-center font-medium transition-colors border ${
+                            slot.available
+                              ? 'bg-muted/30 hover:bg-emerald-50 hover:text-emerald-700 cursor-pointer border-transparent hover:border-emerald-200'
+                              : 'bg-muted/10 text-muted-foreground/40 cursor-not-allowed border-transparent line-through'
+                          }`}
+                        >
+                          {slot.time}
+                        </div>
+                      ))}
+                    </div>
+                  </>
                 )}
               </div>
             )}

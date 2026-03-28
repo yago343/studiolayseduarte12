@@ -337,3 +337,9 @@ export type GetAvailabilityParams = {
   date: string;
   serviceId: number;
 };
+
+export type GetAvailability200Item = {
+  time: string;
+  available: boolean;
+  reason?: string;
+};

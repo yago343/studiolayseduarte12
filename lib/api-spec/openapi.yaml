@@ -566,13 +566,21 @@ paths:
             type: integer
       responses:
         "200":
-          description: Available slots
+          description: All slots with availability status
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  type: string
+                  type: object
+                  required: [time, available]
+                  properties:
+                    time:
+                      type: string
+                    available:
+                      type: boolean
+                    reason:
+                      type: string
 
   /public/book:
     post:

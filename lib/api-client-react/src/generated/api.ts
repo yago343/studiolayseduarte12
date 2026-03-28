@@ -28,6 +28,7 @@ import type {
   DashboardData,
   Expense,
   FinancialSummary,
+  GetAvailability200Item,
   GetAvailabilityParams,
   GetFinancialSummaryParams,
   HealthStatus,
@@ -2536,8 +2537,8 @@ export const getGetAvailabilityUrl = (params: GetAvailabilityParams) => {
 export const getAvailability = async (
   params: GetAvailabilityParams,
   options?: RequestInit,
-): Promise<string[]> => {
-  return customFetch<string[]>(getGetAvailabilityUrl(params), {
+): Promise<GetAvailability200Item[]> => {
+  return customFetch<GetAvailability200Item[]>(getGetAvailabilityUrl(params), {
     ...options,
     method: "GET",
   });

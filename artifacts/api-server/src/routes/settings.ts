@@ -127,7 +127,9 @@ router.get("/availability", async (req, res) => {
   
   await ensureDefaults();
   
-  const dateObj = new Date(date);
+  // Parse date parts directly to avoid timezone issues
+  const [year, month, day] = date.split("-").map(Number);
+  const dateObj = new Date(year, month - 1, day);
   const dayOfWeek = dateObj.getDay();
   
   const [wh] = await db.select().from(workingHoursTable).where(eq(workingHoursTable.dayOfWeek, dayOfWeek));
@@ -139,7 +141,7 @@ router.get("/availability", async (req, res) => {
   if (!service) return res.status(404).json({ error: "Service not found" });
   
   // Generate slots
-  const slots: string[] = [];
+  const slots: { time: string; available: boolean; reason?: string }[] = [];
   const [openH, openM] = wh.openTime.split(":").map(Number);
   const [closeH, closeM] = wh.closeTime.split(":").map(Number);
   let current = openH * 60 + openM;
@@ -150,6 +152,12 @@ router.get("/availability", async (req, res) => {
   
   const existingAppts = await db.select().from(appointmentsTable)
     .where(eq(appointmentsTable.date, date));
+  
+  // Also block past slots for today
+  const now = new Date();
+  const nowMins = now.getFullYear() === year && now.getMonth() === month - 1 && now.getDate() === day
+    ? now.getHours() * 60 + now.getMinutes()
+    : 0;
   
   while (current + service.durationMinutes <= closeMinutes) {
     const slotEnd = current + service.durationMinutes;
@@ -168,9 +176,15 @@ router.get("/availability", async (req, res) => {
       const aEnd = eH * 60 + eM;
       return current < aEnd && slotEnd > aStart;
     });
+
+    const isPast = current < nowMins;
     
-    if (!inBreak && !hasConflict) {
-      slots.push(timeStr);
+    if (!inBreak) {
+      slots.push({
+        time: timeStr,
+        available: !hasConflict && !isPast,
+        reason: hasConflict ? "ocupado" : isPast ? "passado" : undefined,
+      });
     }
     
     current += 30; // 30 min intervals
