@@ -43,10 +43,14 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const adminLogo = (settings as any)?.adminLogoUrl || null;
   const studioName = (settings as any)?.studioName || "Studio Layse";
 
-  const MOBILE_NAME_LIMIT = 16;
-  const mobileStudioName = studioName.length > MOBILE_NAME_LIMIT
-    ? studioName.slice(0, MOBILE_NAME_LIMIT).trimEnd() + "…"
-    : studioName;
+  const lastSpace = studioName.lastIndexOf(' ');
+  const nameLine1 = lastSpace > -1 ? studioName.slice(0, lastSpace) : studioName;
+  const nameLine2 = lastSpace > -1 ? studioName.slice(lastSpace + 1) : '';
+
+  const MOBILE_LINE1_LIMIT = 14;
+  const mobileLine1 = nameLine1.length > MOBILE_LINE1_LIMIT
+    ? nameLine1.slice(0, MOBILE_LINE1_LIMIT).trimEnd() + "…"
+    : nameLine1;
 
   useEffect(() => {
     const isDark = document.documentElement.classList.contains("dark") || 
@@ -87,14 +91,20 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               <div className="w-9 h-9 rounded-full overflow-hidden shrink-0 border-2 border-white/20 shadow-sm">
                 <img src={adminLogo} alt="Logo" className="w-full h-full object-cover" />
               </div>
-              <span className="font-bold text-sm text-white truncate">{studioName}</span>
+              <div className="flex flex-col leading-tight min-w-0">
+                <span className="font-bold text-sm text-white">{nameLine1}</span>
+                {nameLine2 && <span className="font-normal text-xs text-white/75">{nameLine2}</span>}
+              </div>
             </>
           ) : (
             <>
               <div className="w-8 h-8 rounded-xl brand-gradient flex items-center justify-center shadow-sm shrink-0">
                 <Scissors className="w-4 h-4 text-white" />
               </div>
-              <span className="font-bold text-sm text-white">{studioName}</span>
+              <div className="flex flex-col leading-tight min-w-0">
+                <span className="font-bold text-sm text-white">{nameLine1}</span>
+                {nameLine2 && <span className="font-normal text-xs text-white/75">{nameLine2}</span>}
+              </div>
             </>
           )}
         </div>
@@ -145,14 +155,20 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               <div className="w-8 h-8 rounded-full overflow-hidden shrink-0 border-2 border-border shadow-sm">
                 <img src={adminLogo} alt="Logo" className="w-full h-full object-cover" />
               </div>
-              <span className="font-bold text-sm text-foreground">{mobileStudioName}</span>
+              <div className="flex flex-col leading-tight min-w-0">
+                <span className="font-bold text-sm text-foreground">{mobileLine1}</span>
+                {nameLine2 && <span className="font-normal text-xs text-muted-foreground">{nameLine2}</span>}
+              </div>
             </>
           ) : (
             <>
               <div className="w-8 h-8 rounded-xl brand-gradient flex items-center justify-center shadow-sm shrink-0">
                 <Scissors className="w-4 h-4 text-white" />
               </div>
-              <span className="font-bold text-sm text-foreground">{mobileStudioName}</span>
+              <div className="flex flex-col leading-tight min-w-0">
+                <span className="font-bold text-sm text-foreground">{mobileLine1}</span>
+                {nameLine2 && <span className="font-normal text-xs text-muted-foreground">{nameLine2}</span>}
+              </div>
             </>
           )}
         </div>
@@ -200,14 +216,20 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                       <div className="w-8 h-8 rounded-full overflow-hidden shrink-0 border-2 border-border shadow-sm">
                         <img src={adminLogo} alt="Logo" className="w-full h-full object-cover" />
                       </div>
-                      <span className="font-bold text-sm text-foreground">{mobileStudioName}</span>
+                      <div className="flex flex-col leading-tight min-w-0">
+                        <span className="font-bold text-sm text-foreground">{mobileLine1}</span>
+                        {nameLine2 && <span className="font-normal text-xs text-muted-foreground">{nameLine2}</span>}
+                      </div>
                     </>
                   ) : (
                     <>
                       <div className="w-7 h-7 rounded-lg brand-gradient flex items-center justify-center">
                         <Scissors className="w-3.5 h-3.5 text-white" />
                       </div>
-                      <span className="font-bold text-sm text-foreground">{mobileStudioName}</span>
+                      <div className="flex flex-col leading-tight min-w-0">
+                        <span className="font-bold text-sm text-foreground">{mobileLine1}</span>
+                        {nameLine2 && <span className="font-normal text-xs text-muted-foreground">{nameLine2}</span>}
+                      </div>
                     </>
                   )}
                 </div>
