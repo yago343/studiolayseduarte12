@@ -1056,6 +1056,12 @@ components:
         bookingMessage:
           type: string
           nullable: true
+        adminLogoUrl:
+          type: string
+          nullable: true
+        publicLogoUrl:
+          type: string
+          nullable: true
       required:
         - studioName
         - primaryColor
@@ -1071,6 +1077,12 @@ components:
           type: string
           nullable: true
         bookingMessage:
+          type: string
+          nullable: true
+        adminLogoUrl:
+          type: string
+          nullable: true
+        publicLogoUrl:
           type: string
           nullable: true
 
