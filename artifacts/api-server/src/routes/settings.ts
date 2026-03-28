@@ -122,8 +122,8 @@ router.put("/schedule", async (req, res) => {
 
 // Availability
 router.get("/availability", async (req, res) => {
-  const { date, serviceId } = req.query as Record<string, string>;
-  if (!date || !serviceId) return res.status(400).json({ error: "date and serviceId required" });
+  const { date, serviceId, serviceIds } = req.query as Record<string, string>;
+  if (!date || (!serviceId && !serviceIds)) return res.status(400).json({ error: "date and serviceId (or serviceIds) required" });
   
   await ensureDefaults();
   
@@ -136,9 +136,20 @@ router.get("/availability", async (req, res) => {
   if (!wh || wh.isOpen === "false" || !wh.openTime || !wh.closeTime) {
     return res.json([]);
   }
-  
-  const [service] = await db.select().from(servicesTable).where(eq(servicesTable.id, parseInt(serviceId)));
-  if (!service) return res.status(404).json({ error: "Service not found" });
+
+  // Compute total duration from one or multiple services
+  let totalDuration = 0;
+  if (serviceIds) {
+    const ids = serviceIds.split(",").map(id => parseInt(id.trim())).filter(id => !isNaN(id));
+    const allServices = await db.select().from(servicesTable);
+    const selected = allServices.filter(s => ids.includes(s.id));
+    if (selected.length === 0) return res.status(404).json({ error: "No services found" });
+    totalDuration = selected.reduce((sum, s) => sum + s.durationMinutes, 0);
+  } else {
+    const [service] = await db.select().from(servicesTable).where(eq(servicesTable.id, parseInt(serviceId)));
+    if (!service) return res.status(404).json({ error: "Service not found" });
+    totalDuration = service.durationMinutes;
+  }
   
   // Generate slots
   const slots: { time: string; available: boolean; reason?: string }[] = [];
@@ -159,8 +170,8 @@ router.get("/availability", async (req, res) => {
     ? now.getHours() * 60 + now.getMinutes()
     : 0;
   
-  while (current + service.durationMinutes <= closeMinutes) {
-    const slotEnd = current + service.durationMinutes;
+  while (current + totalDuration <= closeMinutes) {
+    const slotEnd = current + totalDuration;
     const timeStr = `${String(Math.floor(current / 60)).padStart(2, "0")}:${String(current % 60).padStart(2, "0")}`;
     
     // Check break overlap
@@ -195,10 +206,31 @@ router.get("/availability", async (req, res) => {
 
 // Public booking
 router.post("/public/book", async (req, res) => {
-  const { clientName, clientPhone, clientEmail, serviceId, date, startTime, notes } = req.body;
-  
-  const [service] = await db.select().from(servicesTable).where(eq(servicesTable.id, parseInt(serviceId)));
-  if (!service) return res.status(404).json({ error: "Service not found" });
+  const { clientName, clientPhone, clientEmail, serviceId, serviceIds, date, startTime, notes } = req.body;
+
+  // Support single or multiple services
+  let primaryServiceId: number;
+  let combinedName: string;
+  let combinedPrice: number;
+  let totalDuration: number;
+
+  if (serviceIds && Array.isArray(serviceIds) && serviceIds.length > 0) {
+    const ids = serviceIds.map((id: number | string) => parseInt(String(id)));
+    const allServices = await db.select().from(servicesTable);
+    const selected = allServices.filter(s => ids.includes(s.id));
+    if (selected.length === 0) return res.status(404).json({ error: "No services found" });
+    primaryServiceId = selected[0].id;
+    combinedName = selected.map(s => s.name).join(" + ");
+    combinedPrice = selected.reduce((sum, s) => sum + parseFloat(String(s.price)), 0);
+    totalDuration = selected.reduce((sum, s) => sum + s.durationMinutes, 0);
+  } else {
+    const [service] = await db.select().from(servicesTable).where(eq(servicesTable.id, parseInt(serviceId)));
+    if (!service) return res.status(404).json({ error: "Service not found" });
+    primaryServiceId = service.id;
+    combinedName = service.name;
+    combinedPrice = parseFloat(String(service.price));
+    totalDuration = service.durationMinutes;
+  }
   
   // Find or create client
   let clientId = null;
@@ -221,16 +253,16 @@ router.post("/public/book", async (req, res) => {
   }
   
   const [h, m] = startTime.split(":").map(Number);
-  const totalMins = h * 60 + m + service.durationMinutes;
+  const totalMins = h * 60 + m + totalDuration;
   const endTime = `${String(Math.floor(totalMins / 60)).padStart(2, "0")}:${String(totalMins % 60).padStart(2, "0")}`;
   
   const [appt] = await db.insert(appointmentsTable).values({
     clientId,
     clientName,
     clientPhone: clientPhone || null,
-    serviceId,
-    serviceName: service.name,
-    servicePrice: service.price,
+    serviceId: primaryServiceId,
+    serviceName: combinedName,
+    servicePrice: String(combinedPrice),
     date,
     startTime,
     endTime,
