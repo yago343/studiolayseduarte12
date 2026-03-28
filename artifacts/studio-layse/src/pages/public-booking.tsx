@@ -4,7 +4,7 @@ import { useGetSettings, useListServices } from "@workspace/api-client-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Calendar as CalIcon, Clock, User, CheckCircle2, Check } from "lucide-react";
+import { Calendar as CalIcon, Clock, User, CheckCircle2, Check, Plus, X } from "lucide-react";
 import { format, addDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -52,6 +52,7 @@ export default function PublicBooking() {
 
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [formData, setFormData] = useState({ name: "", phone: "", email: "" });
+  const [showAddService, setShowAddService] = useState(false);
   
   const bookMut = useMutation({
     mutationFn: submitBooking,
@@ -266,9 +267,20 @@ export default function PublicBooking() {
                   <div className="mt-8 p-5 bg-primary/5 rounded-2xl border border-primary/10 space-y-2">
                     <h4 className="font-bold mb-3">Resumo do agendamento</h4>
                     {selectedServiceObjects.map(s => (
-                      <div key={s.id} className="flex justify-between text-sm">
+                      <div key={s.id} className="flex justify-between items-center text-sm">
                         <span className="text-foreground">{s.name}</span>
-                        <span className="text-emerald-700 font-medium">R$ {Number(s.price).toFixed(2)}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-emerald-700 font-medium">R$ {Number(s.price).toFixed(2)}</span>
+                          {selectedServiceObjects.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => setSelectedServices(prev => prev.filter(id => id !== s.id))}
+                              className="text-muted-foreground/50 hover:text-red-400 transition-colors"
+                            >
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                        </div>
                       </div>
                     ))}
                     {selectedServiceObjects.length > 1 && (
@@ -280,6 +292,46 @@ export default function PublicBooking() {
                     <p className="text-sm text-muted-foreground pt-1">
                       {format(new Date(selectedDate), 'dd/MM/yyyy')} às {selectedTime} • {totalDuration} min
                     </p>
+
+                    {/* Add service button */}
+                    {services && services.filter(s => !selectedServices.includes(s.id)).length > 0 && (
+                      <div className="pt-2">
+                        <button
+                          type="button"
+                          onClick={() => setShowAddService(v => !v)}
+                          className="flex items-center gap-1.5 text-sm font-medium transition-colors"
+                          style={{ color: primaryColor }}
+                        >
+                          <Plus className="w-4 h-4" />
+                          {showAddService ? "Fechar" : "Adicionar outro serviço"}
+                        </button>
+
+                        {showAddService && (
+                          <div className="mt-3 space-y-2 animate-in fade-in slide-in-from-top-2 duration-200">
+                            {services.filter(s => !selectedServices.includes(s.id)).map(s => (
+                              <div
+                                key={s.id}
+                                onClick={() => {
+                                  setSelectedServices(prev => [...prev, s.id]);
+                                  setShowAddService(false);
+                                  setSelectedTime(null);
+                                  setStep(3);
+                                }}
+                                className="flex justify-between items-center p-3 rounded-xl bg-background border border-border/60 cursor-pointer hover:border-primary/30 hover:bg-primary/5 transition-all"
+                              >
+                                <div>
+                                  <p className="font-medium text-sm">{s.name}</p>
+                                  <p className="text-xs text-muted-foreground">{s.durationMinutes} min</p>
+                                </div>
+                                <span className="text-xs font-medium text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
+                                  R$ {Number(s.price).toFixed(2)}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
 
                   <Button
@@ -304,7 +356,7 @@ export default function PublicBooking() {
                   Seu horário foi reservado com sucesso. Te enviamos os detalhes no WhatsApp.
                 </p>
                 <Button
-                  onClick={() => { setStep(1); setSelectedServices([]); setSelectedTime(null); setFormData({name:"",phone:"",email:""}); }}
+                  onClick={() => { setStep(1); setSelectedServices([]); setSelectedTime(null); setFormData({name:"",phone:"",email:""}); setShowAddService(false); }}
                   variant="outline"
                   className="mt-10 rounded-xl h-12"
                 >
