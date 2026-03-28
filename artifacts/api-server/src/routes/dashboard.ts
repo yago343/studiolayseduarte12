@@ -4,50 +4,40 @@ import { gte, lte, and, eq } from "drizzle-orm";
 
 const router = Router();
 
-function getDateRange(offsetDays: number, rangeDays: number) {
-  const end = new Date();
-  const start = new Date();
-  start.setDate(start.getDate() - rangeDays + 1);
-  return {
-    start: start.toISOString().split("T")[0],
-    end: end.toISOString().split("T")[0],
-  };
-}
-
 router.get("/", async (req, res) => {
   const today = new Date().toISOString().split("T")[0];
-  
+
   const weekStart = new Date();
   weekStart.setDate(weekStart.getDate() - 6);
   const weekStartStr = weekStart.toISOString().split("T")[0];
-  
+
   const monthStart = new Date();
   monthStart.setDate(1);
   const monthStartStr = monthStart.toISOString().split("T")[0];
-  
-  // Get all incomes for different periods
-  const [todayIncomes, weekIncomes, monthIncomes] = await Promise.all([
+
+  const sixMonthsAgo = new Date();
+  sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 5);
+  sixMonthsAgo.setDate(1);
+
+  const [todayIncomes, weekIncomes, monthIncomes, allIncomes, todayAppts, weekAppts, monthAppts, upcomingAppts] = await Promise.all([
     db.select().from(incomesTable).where(eq(incomesTable.date, today)),
     db.select().from(incomesTable).where(and(gte(incomesTable.date, weekStartStr), lte(incomesTable.date, today))),
     db.select().from(incomesTable).where(and(gte(incomesTable.date, monthStartStr), lte(incomesTable.date, today))),
-  ]);
-  
-  // Get appointments for different periods
-  const [todayAppts, weekAppts, monthAppts, upcomingAppts] = await Promise.all([
-    db.select().from(appointmentsTable).where(and(eq(appointmentsTable.date, today))),
+    db.select().from(incomesTable).where(gte(incomesTable.date, sixMonthsAgo.toISOString().split("T")[0])),
+    db.select().from(appointmentsTable).where(eq(appointmentsTable.date, today)),
     db.select().from(appointmentsTable).where(and(gte(appointmentsTable.date, weekStartStr), lte(appointmentsTable.date, today))),
     db.select().from(appointmentsTable).where(and(gte(appointmentsTable.date, monthStartStr), lte(appointmentsTable.date, today))),
     db.select().from(appointmentsTable).where(and(gte(appointmentsTable.date, today), eq(appointmentsTable.status, "confirmed"))).limit(10),
   ]);
-  
+
   const todayRevenue = todayIncomes.reduce((s, i) => s + parseFloat(i.amount), 0);
   const weekRevenue = weekIncomes.reduce((s, i) => s + parseFloat(i.amount), 0);
   const monthRevenue = monthIncomes.reduce((s, i) => s + parseFloat(i.amount), 0);
-  
+
   const completedMonthAppts = monthAppts.filter(a => a.status === "completed");
   const averageTicket = completedMonthAppts.length > 0 ? monthRevenue / completedMonthAppts.length : 0;
-  
-  // Top services
+
+  // Top services (month)
   const serviceCount: Record<string, { count: number; revenue: number }> = {};
   monthAppts.filter(a => a.status === "completed").forEach(a => {
     if (!serviceCount[a.serviceName]) serviceCount[a.serviceName] = { count: 0, revenue: 0 };
@@ -58,26 +48,54 @@ router.get("/", async (req, res) => {
     .sort((a, b) => b[1].count - a[1].count)
     .slice(0, 5)
     .map(([serviceName, data]) => ({ serviceName, ...data }));
-  
-  // Monthly revenue (last 6 months)
-  const monthlyData: Record<string, number> = {};
+
+  // Daily revenue — hourly buckets for today (completed appointments by startTime hour)
+  const hourlyData: Record<string, number> = {};
+  for (let h = 7; h <= 20; h++) {
+    hourlyData[`${String(h).padStart(2, "0")}h`] = 0;
+  }
+  todayIncomes.forEach(income => {
+    // Match income to today's appointments by amount to find approximate hour
+    // Since incomes don't have time, we'll use completed appointments startTime
+  });
+  // Use completed today's appointments for hourly breakdown
+  todayAppts.filter(a => a.status === "completed").forEach(a => {
+    const hour = parseInt((a.startTime || "00:00").split(":")[0], 10);
+    const key = `${String(hour).padStart(2, "0")}h`;
+    if (key in hourlyData) {
+      hourlyData[key] += parseFloat(a.servicePrice);
+    }
+  });
+  const dailyRevenue = Object.entries(hourlyData).map(([hour, amount]) => ({ label: hour, amount }));
+
+  // Weekly revenue — one entry per day for last 7 days
+  const dayNames = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+  const weeklyData: { label: string; date: string; amount: number }[] = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const dateStr = d.toISOString().split("T")[0];
+    weeklyData.push({ label: dayNames[d.getDay()], date: dateStr, amount: 0 });
+  }
+  weekIncomes.forEach(income => {
+    const entry = weeklyData.find(w => w.date === income.date);
+    if (entry) entry.amount += parseFloat(income.amount);
+  });
+
+  // Monthly revenue — last 6 months
   const now = new Date();
+  const monthlyData: Record<string, number> = {};
   for (let i = 5; i >= 0; i--) {
     const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
     const key = d.toLocaleString("pt-BR", { month: "short", year: "2-digit" });
     monthlyData[key] = 0;
   }
-  
-  const sixMonthsAgo = new Date();
-  sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 5);
-  sixMonthsAgo.setDate(1);
-  const allIncomes = await db.select().from(incomesTable).where(gte(incomesTable.date, sixMonthsAgo.toISOString().split("T")[0]));
   allIncomes.forEach(income => {
     const d = new Date(income.date);
     const key = d.toLocaleString("pt-BR", { month: "short", year: "2-digit" });
     if (key in monthlyData) monthlyData[key] += parseFloat(income.amount);
   });
-  
+
   res.json({
     todayRevenue,
     weekRevenue,
@@ -93,6 +111,8 @@ router.get("/", async (req, res) => {
       createdAt: a.createdAt.toISOString(),
     })),
     topServices,
+    dailyRevenue,
+    weeklyRevenue: weeklyData.map(({ label, amount }) => ({ label, amount })),
     monthlyRevenue: Object.entries(monthlyData).map(([month, amount]) => ({ month, amount })),
   });
 });

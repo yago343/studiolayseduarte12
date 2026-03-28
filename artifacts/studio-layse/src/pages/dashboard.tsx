@@ -128,53 +128,69 @@ export default function Dashboard() {
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
 
-        {/* Revenue area chart */}
-        <Card className="lg:col-span-2 rounded-2xl border-border/70 shadow-sm">
-          <CardHeader className="pb-2 px-5 pt-5">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-sm font-semibold text-foreground">Receita mensal</CardTitle>
-              <span className="text-xs text-muted-foreground">Últimos 6 meses</span>
-            </div>
-          </CardHeader>
-          <CardContent className="px-5 pb-5 pt-0">
-            <div className="h-[220px] sm:h-[260px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={data.monthlyRevenue} margin={{ top: 8, right: 4, left: -8, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#10b981" stopOpacity={0.25} />
-                      <stop offset="100%" stopColor="#10b981" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
-                  <XAxis
-                    dataKey="month"
-                    axisLine={false} tickLine={false}
-                    tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }}
-                    dy={6}
-                  />
-                  <YAxis
-                    axisLine={false} tickLine={false}
-                    tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }}
-                    tickFormatter={v => `R$${v}`}
-                    width={52}
-                  />
-                  <Tooltip
-                    contentStyle={{ borderRadius: 10, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,.1)', fontSize: 12 }}
-                    formatter={(v: number) => [formatCurrency(v), 'Receita']}
-                  />
-                  <Area
-                    type="monotone" dataKey="amount"
-                    stroke="#10b981" strokeWidth={2}
-                    fill="url(#revGrad)"
-                    dot={{ fill: '#10b981', r: 3, strokeWidth: 0 }}
-                    activeDot={{ r: 4, strokeWidth: 0 }}
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Revenue area chart — adapts to period */}
+        {(() => {
+          const chartData =
+            period === "day"
+              ? (data as any).dailyRevenue?.map((d: any) => ({ label: d.label, amount: d.amount })) ?? []
+              : period === "week"
+              ? (data as any).weeklyRevenue?.map((d: any) => ({ label: d.label, amount: d.amount })) ?? []
+              : data.monthlyRevenue.map(d => ({ label: d.month, amount: d.amount }));
+
+          const chartTitle =
+            period === "day" ? "Receita por hora — hoje" :
+            period === "week" ? "Receita por dia — últimos 7 dias" :
+            "Receita mensal — últimos 6 meses";
+
+          return (
+            <Card className="lg:col-span-2 rounded-2xl border-border/70 shadow-sm">
+              <CardHeader className="pb-2 px-5 pt-5">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-sm font-semibold text-foreground">{chartTitle}</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent className="px-5 pb-5 pt-0">
+                <div className="h-[220px] sm:h-[260px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={chartData} margin={{ top: 8, right: 4, left: -8, bottom: 0 }}>
+                      <defs>
+                        <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#10b981" stopOpacity={0.25} />
+                          <stop offset="100%" stopColor="#10b981" stopOpacity={0} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
+                      <XAxis
+                        dataKey="label"
+                        axisLine={false} tickLine={false}
+                        tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }}
+                        dy={6}
+                        interval={period === "day" ? 1 : 0}
+                      />
+                      <YAxis
+                        axisLine={false} tickLine={false}
+                        tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }}
+                        tickFormatter={v => `R$${v}`}
+                        width={52}
+                      />
+                      <Tooltip
+                        contentStyle={{ borderRadius: 10, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,.1)', fontSize: 12 }}
+                        formatter={(v: number) => [formatCurrency(v), 'Receita']}
+                      />
+                      <Area
+                        type="monotone" dataKey="amount"
+                        stroke="#10b981" strokeWidth={2}
+                        fill="url(#revGrad)"
+                        dot={{ fill: '#10b981', r: 3, strokeWidth: 0 }}
+                        activeDot={{ r: 4, strokeWidth: 0 }}
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })()}
 
         {/* Top Services bar chart */}
         <Card className="rounded-2xl border-border/70 shadow-sm">
