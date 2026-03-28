@@ -64,7 +64,7 @@ export default function PublicBooking() {
       <div className="relative z-10 max-w-2xl mx-auto pt-16 px-4">
         <div className="text-center mb-10">
           <div className="w-20 h-20 mx-auto bg-white rounded-full shadow-xl flex items-center justify-center p-1 mb-4 overflow-hidden">
-            <img src={`${import.meta.env.BASE_URL}images/logo-placeholder.png`} alt="Logo" className="w-full h-full object-cover" />
+            <img src={`${import.meta.env.BASE_URL}images/logo-placeholder.png`} alt="Logo" className="w-full h-full object-cover scale-125 object-top" />
           </div>
           <h1 className="text-4xl font-serif font-bold text-foreground mb-2">{studioName}</h1>
           <p className="text-muted-foreground">{settings?.bookingMessage || "Agende seu momento de beleza com facilidade."}</p>
