@@ -257,7 +257,7 @@ export default function PublicBooking() {
                 <form onSubmit={handleBook} className="space-y-4">
                   <div className="space-y-2">
                     <label className="text-sm font-medium pl-1">Nome Completo</label>
-                    <Input required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="h-14 rounded-2xl bg-muted/30 border-none px-5 text-lg" placeholder="Como gosta de ser chamada?" />
+                    <Input required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="h-14 rounded-2xl bg-muted/30 border-none px-5 text-lg" placeholder="Digite aqui..." />
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-medium pl-1">WhatsApp</label>
