@@ -18,3 +18,9 @@ id = "JJoyQjtnbedEcUyF31RVA"
 uri = "file://studio-layse-vercel.tar.gz"
 type = "unspecified"
 title = "Studio Layse Duarte — Pronto para Vercel"
+
+[[outputs]]
+id = "Iar7tqbxPMlsJDx_OCkbx"
+uri = "file://studio-layse-completo.tar.gz"
+type = "unspecified"
+title = "Studio Layse Duarte — Projeto Completo"
